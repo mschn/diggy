@@ -1,16 +1,24 @@
 import { Dict } from '@pixi/utils';
-import * as PIXI from 'pixi.js';
-import { Engine, PLAYER_SIZE, CELL_SIZE } from 'diggy-shared';
+import { Engine, PLAYER_SIZE, CELL_SIZE, Cell } from 'diggy-shared';
+import {
+  Application,
+  Container,
+  LoaderResource,
+  Sprite,
+  Graphics as PixiGraphics
+} from 'pixi.js';
 export class Graphics {
-  private app: PIXI.Application;
-  private player: PIXI.Sprite;
-  private map: PIXI.Container;
+  private app: Application;
+  private player: Sprite;
+  private map: Container;
+
+  private mouseOverOutline: PixiGraphics;
 
   constructor(private readonly engine: Engine) {}
 
   start(): void {
     const canvas = document.querySelector('#main canvas') as HTMLCanvasElement;
-    this.app = new PIXI.Application({
+    this.app = new Application({
       view: canvas,
       backgroundColor: 0x000000
     });
@@ -19,12 +27,12 @@ export class Graphics {
       .add('sky', 'sky.png')
       .add('stone', 'stone.png')
       .load((loader, resources) => {
-        this.player = new PIXI.Sprite(resources.player.texture);
+        this.player = new Sprite(resources.player.texture);
         this.player.anchor.set(0.5, 0.5);
         this.player.width = PLAYER_SIZE;
         this.player.height = PLAYER_SIZE;
 
-        this.map = new PIXI.Container();
+        this.map = new Container();
         this.app.stage.addChild(this.map);
         this.app.stage.addChild(this.player);
 
@@ -34,22 +42,16 @@ export class Graphics {
       });
   }
 
-  renderMap(resources: Dict<PIXI.LoaderResource>): void {
+  renderMap(resources: Dict<LoaderResource>): void {
     this.engine.map.forEach((line, i) => {
       line.forEach((cell, j) => {
-        const sprite = new PIXI.Sprite(resources[cell.type.sprite].texture);
+        const sprite = new Sprite(resources[cell.type.sprite].texture);
         sprite.x = CELL_SIZE * j;
         sprite.y = CELL_SIZE * i;
         sprite.width = CELL_SIZE;
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
-        sprite.on(
-          'pointerover',
-          () => {
-            console.log(`${cell.type.name} ${cell.x} ${cell.y}`);
-          },
-          this
-        );
+        sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
         this.map.addChild(sprite);
       });
     });
@@ -63,5 +65,23 @@ export class Graphics {
     // center map around player
     this.app.stage.x = this.app.screen.width / 2 - this.player.x;
     this.app.stage.y = this.app.screen.height / 2 - this.player.y;
+  }
+
+  mouseOverCell(cell: Cell, sprite: Sprite): void {
+    if (this.mouseOverOutline) {
+      this.map.removeChild(this.mouseOverOutline);
+    }
+    this.mouseOverOutline = new PixiGraphics();
+    this.mouseOverOutline.lineStyle(1, 0xffffff, 1);
+    this.mouseOverOutline.drawRect(
+      sprite.x,
+      sprite.y,
+      sprite.width,
+      sprite.height
+    );
+    this.mouseOverOutline.endFill();
+    this.map.addChild(this.mouseOverOutline);
+
+    document.querySelector('#ui').innerHTML = `${cell.x}x${cell.y} : ${cell.type.name}`;
   }
 }

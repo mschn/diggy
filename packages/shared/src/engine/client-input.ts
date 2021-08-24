@@ -20,13 +20,13 @@ export class ClientInput {
   }
 
   onKey(e: KeyboardEvent, isKeyDown: boolean): void {
-    if (e.key === 'ArrowLeft') {
+    if (e.key === 'a') {
       this.engine.player.moveLeft(isKeyDown);
     }
-    if (e.key === 'ArrowRight') {
+    if (e.key === 'd') {
       this.engine.player.moveRight(isKeyDown);
     }
-    if (e.key === 'ArrowUp' && isKeyDown) {
+    if ((e.key === 'w' || e.key === ' ') && isKeyDown) {
       this.engine.player.jump();
     }
   }

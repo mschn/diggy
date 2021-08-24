@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "start": "webpack serve"
+    "start": "cd packages/client && npm run start"
   },
   "keywords": [],
   "author": "mathieu.schnoor@gmail.com",
