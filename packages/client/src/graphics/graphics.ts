@@ -52,6 +52,7 @@ export class Graphics {
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
         sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
+        sprite.on('pointerout', () => this.mouseOutCell());
         this.map.addChild(sprite);
       });
     });
@@ -67,9 +68,16 @@ export class Graphics {
     this.app.stage.y = this.app.screen.height / 2 - this.player.y;
   }
 
-  mouseOverCell(cell: Cell, sprite: Sprite): void {
+  mouseOutCell(): void {
     if (this.mouseOverOutline) {
       this.map.removeChild(this.mouseOverOutline);
+      document.querySelector('#ui').innerHTML = '';
+    }
+  }
+
+  mouseOverCell(cell: Cell, sprite: Sprite): void {
+    if (!cell.type.isWall) {
+      return;
     }
     this.mouseOverOutline = new PixiGraphics();
     this.mouseOverOutline.lineStyle(1, 0xffffff, 1);
@@ -82,6 +90,8 @@ export class Graphics {
     this.mouseOverOutline.endFill();
     this.map.addChild(this.mouseOverOutline);
 
-    document.querySelector('#ui').innerHTML = `${cell.x}x${cell.y} : ${cell.type.name}`;
+    document.querySelector(
+      '#ui'
+    ).innerHTML = `${cell.x}x${cell.y} : ${cell.type.name}`;
   }
 }
