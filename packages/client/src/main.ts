@@ -1,5 +1,4 @@
-import { ClientInput } from './engine/ClientInput';
-import { Engine } from './engine/engine';
+import { ClientInput, Engine } from 'diggy-shared';
 import { Graphics } from './graphics/graphics';
 
 export class Main {

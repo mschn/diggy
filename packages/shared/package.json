@@ -1,0 +1,11 @@
+{
+  "name": "diggy-shared",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {},
+  "keywords": [],
+  "author": "mathieu.schnoor@gmail.com",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {}
+}

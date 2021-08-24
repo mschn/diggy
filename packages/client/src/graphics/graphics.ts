@@ -1,10 +1,9 @@
 import { Dict } from '@pixi/utils';
 import * as PIXI from 'pixi.js';
-import { CELL_SIZE, PLAYER_SIZE } from '../engine/constants';
-import { Engine } from '../engine/engine';
+import { Engine, PLAYER_SIZE, CELL_SIZE } from 'diggy-shared';
 export class Graphics {
   private app: PIXI.Application;
-  private player: PIXI.Sprite  ;
+  private player: PIXI.Sprite;
   private map: PIXI.Container;
 
   constructor(private readonly engine: Engine) {}
@@ -21,7 +20,7 @@ export class Graphics {
       .add('stone', 'stone.png')
       .load((loader, resources) => {
         this.player = new PIXI.Sprite(resources.player.texture);
-        this.player.anchor.set(0.5, .50);
+        this.player.anchor.set(0.5, 0.5);
         this.player.width = PLAYER_SIZE;
         this.player.height = PLAYER_SIZE;
 
@@ -44,9 +43,13 @@ export class Graphics {
         sprite.width = CELL_SIZE;
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
-        sprite.on('pointerover', () => {
-          console.log(`${cell.type.name} ${cell.x} ${cell.y}`)
-        }, this);
+        sprite.on(
+          'pointerover',
+          () => {
+            console.log(`${cell.type.name} ${cell.x} ${cell.y}`);
+          },
+          this
+        );
         this.map.addChild(sprite);
       });
     });
