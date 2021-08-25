@@ -6,6 +6,8 @@
   "keywords": [],
   "author": "mathieu.schnoor@gmail.com",
   "license": "ISC",
-  "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "server": "^1.0.35",
+    "ws": "^8.2.0"
+  }
 }
