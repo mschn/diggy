@@ -8,8 +8,10 @@ import {
   Graphics as PixiGraphics
 } from 'pixi.js';
 export class Graphics {
+  login: string;
+
   private app: Application;
-  private player: Sprite;
+  private players: Sprite[] = [];
   private map: Container;
 
   private mouseOverOutline: PixiGraphics;
@@ -27,14 +29,8 @@ export class Graphics {
       .add('sky', 'sky.png')
       .add('stone', 'stone.png')
       .load((loader, resources) => {
-        this.player = new Sprite(resources.player.texture);
-        this.player.anchor.set(0.5, 0.5);
-        this.player.width = PLAYER_SIZE;
-        this.player.height = PLAYER_SIZE;
-
         this.map = new Container();
         this.app.stage.addChild(this.map);
-        this.app.stage.addChild(this.player);
 
         this.renderMap(resources);
 
@@ -42,8 +38,17 @@ export class Graphics {
       });
   }
 
+  addPlayer(): void {
+    const player = new Sprite(this.app.loader.resources.player.texture);
+    player.anchor.set(0.5, 0.5);
+    player.width = PLAYER_SIZE;
+    player.height = PLAYER_SIZE;
+    this.players.push(player);
+    this.app.stage.addChild(player);
+  }
+
   renderMap(resources: Dict<LoaderResource>): void {
-    this.engine.map.forEach((line, i) => {
+    this.engine.map.cells.forEach((line, i) => {
       line.forEach((cell, j) => {
         const sprite = new Sprite(resources[cell.type.sprite].texture);
         sprite.x = CELL_SIZE * j;
@@ -59,13 +64,21 @@ export class Graphics {
   }
 
   update(): void {
-    // update player location
-    this.player.x = this.engine.player.x;
-    this.player.y = this.engine.player.y;
+    while (this.players.length < this.engine.players.length) {
+      this.addPlayer();
+    }
 
-    // center map around player
-    this.app.stage.x = this.app.screen.width / 2 - this.player.x;
-    this.app.stage.y = this.app.screen.height / 2 - this.player.y;
+    this.players.forEach((player, i) => {
+      // update player location
+      player.x = this.engine.players[i].x;
+      player.y = this.engine.players[i].y;
+
+      // center map around player
+      if (this.engine.players[i].name === this.login) {
+        this.app.stage.x = this.app.screen.width / 2 - this.players[i].x;
+        this.app.stage.y = this.app.screen.height / 2 - this.players[i].y;
+      }
+    });
   }
 
   mouseOutCell(): void {

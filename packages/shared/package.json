@@ -2,7 +2,9 @@
   "name": "diggy-shared",
   "version": "0.0.0",
   "description": "",
-  "scripts": {},
+  "scripts": {
+    "build": "tsc"
+  },
   "keywords": [],
   "author": "mathieu.schnoor@gmail.com",
   "license": "ISC",

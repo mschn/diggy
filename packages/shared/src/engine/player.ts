@@ -10,6 +10,8 @@ export class Player {
   airborne = false;
   jumpTime = 0;
 
+  constructor(public name: string) {}
+
   moveLeft(state: boolean): void {
     this.movingLeft = state;
   }
