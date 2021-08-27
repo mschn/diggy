@@ -14,7 +14,7 @@ export class Ws {
   onPlayers: (players: Player[]) => void;
 
   start(): void {
-    this.wss = new WebSocket('ws://localhost:8080/');
+    this.wss = new WebSocket('ws://localhost:8080/game');
     this.wss.onmessage = (event) => {
       const cmd = JSON.parse(event.data) as Command;
       if (cmd.type === ServerCommandType.MAP) {

@@ -47,6 +47,10 @@ export class Graphics {
     this.app.stage.addChild(player);
   }
 
+  removePlayer(): void {
+    this.players.pop();
+  }
+
   renderMap(resources: Dict<LoaderResource>): void {
     this.engine.map.cells.forEach((line, i) => {
       line.forEach((cell, j) => {
@@ -64,9 +68,7 @@ export class Graphics {
   }
 
   update(): void {
-    while (this.players.length < this.engine.players.length) {
-      this.addPlayer();
-    }
+    this.adjustPlayerCount();
 
     this.players.forEach((player, i) => {
       // update player location
@@ -79,6 +81,15 @@ export class Graphics {
         this.app.stage.y = this.app.screen.height / 2 - this.players[i].y;
       }
     });
+  }
+
+  adjustPlayerCount(): void {
+    while (this.players.length < this.engine.players.length) {
+      this.addPlayer();
+    }
+    while (this.players.length > this.engine.players.length) {
+      this.removePlayer();
+    }
   }
 
   mouseOutCell(): void {

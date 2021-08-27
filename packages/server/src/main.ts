@@ -14,7 +14,7 @@ import WebSocket = require('ws');
 export class Main {
   engine: Engine;
   wss: Server;
-  updateClients = true;
+  updateClients = false;
 
   public start(): void {
     let i = 0;
@@ -24,10 +24,11 @@ export class Main {
     this.engine.loadMap(STATIC_MAP);
     this.engine.start();
 
-    this.wss = new Server({ port: 8080 });
+    this.wss = new Server({ port: 8080, path: '/game' });
     this.wss.on('connection', (ws) => {
       const name = `Player_${i++}`;
       this.engine.spawnPlayer(name);
+      this.updateClients = true;
 
       ws.send(
         JSON.stringify({
@@ -61,6 +62,11 @@ export class Main {
         if (cmd.type === ClientCommandType.JUMP) {
           this.engine.getPlayer(name).jump();
         }
+      });
+
+      ws.on('close', () => {
+        this.engine.removePlayer(name);
+        this.updateClients = true;
       });
     });
   }

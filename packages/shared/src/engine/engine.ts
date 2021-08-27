@@ -16,8 +16,6 @@ export class Engine {
   loadMap(mapStr: string): void {
     this.map = new Map();
     this.map.load(mapStr);
-    // const player = this.spawnPlayer();
-    // this.players.push(this.player);
   }
 
   spawnPlayer(name: string): void {
@@ -28,8 +26,12 @@ export class Engine {
     this.players.push(player);
   }
 
+  removePlayer(name: string): void {
+    this.players = this.players.filter((p) => p.name !== name);
+  }
+
   getPlayer(name: string): Player {
-    return this.players.find(p => p.name === name);
+    return this.players.find((p) => p.name === name);
   }
 
   update(): void {
@@ -48,9 +50,6 @@ export class Engine {
 
       // move left
       if (player.movingLeft) {
-
-        console.log('move left');
-
         x -= player.speed * dt;
         const cell = this.map.getCell(x - PLAYER_SIZE / 2, y);
         if (cell.type.isWall) {

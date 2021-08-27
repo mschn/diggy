@@ -26,6 +26,7 @@ export class Main {
     console.log(`Logged in as ${login}`);
     this.login = login;
     this.graphics.login = login;
+    this.input.login = login;
   }
 
   private onMapLoaded(mapStr: string): void {

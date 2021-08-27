@@ -3,6 +3,7 @@ import { Ws } from './ws';
 
 export class ClientInput {
   canvas: HTMLCanvasElement;
+  login: string;
 
   constructor(private readonly engine: Engine, private readonly ws: Ws) {}
 
@@ -33,9 +34,9 @@ export class ClientInput {
   }
 
   moveLeft(start: boolean): void {
-    // if (this.engine.player.movingLeft && start) {
-    // return;
-    // }
+    if (this.engine.getPlayer(this.login).movingLeft && start) {
+      return;
+    }
     this.ws.send({
       type: ClientCommandType.MOVE_LEFT,
       start
@@ -44,9 +45,9 @@ export class ClientInput {
   }
 
   moveRight(start: boolean): void {
-    // if (this.engine.player.movingRight && start) {
-    // return;
-    // }
+    if (this.engine.getPlayer(this.login).movingRight && start) {
+      return;
+    }
     this.ws.send({
       type: ClientCommandType.MOVE_RIGHT,
       start
@@ -55,9 +56,9 @@ export class ClientInput {
   }
 
   jump(start: boolean): void {
-    // if (this.engine.player.airborne && start) {
-    // return;
-    // }
+    if (this.engine.getPlayer(this.login).airborne && start) {
+      return;
+    }
     this.ws.send({
       type: ClientCommandType.JUMP,
       start
