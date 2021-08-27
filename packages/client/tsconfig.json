@@ -1,12 +1,11 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/",
-    "sourceMap": true,
-    "noImplicitAny": true,
+    "rootDir": "src",
+    "outDir": "dist",
     "module": "es6",
     "target": "es5",
-    "allowJs": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
-  }
+    "allowSyntheticDefaultImports": true,
+  },
+  "references": [{ "path": "../shared" }]
 }

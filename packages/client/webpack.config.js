@@ -5,11 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
   entry: {
     index: {
-      import: './src/index.ts',
-      dependOn: 'diggy-shared'
-    },
-    'diggy-shared': {
-      import: '../shared/index.ts'
+      import: './src/index.ts'
     }
   },
   mode: 'development',
@@ -20,12 +16,6 @@ module.exports = {
         test: /\.tsx?$/,
         use: 'ts-loader',
         include: path.resolve(__dirname, 'src'),
-        exclude: /node_modules/
-      },
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        include: path.resolve(__dirname, '../shared/src'),
         exclude: /node_modules/
       },
       {

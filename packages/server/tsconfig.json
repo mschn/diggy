@@ -1,14 +1,16 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/",
-    "sourceMap": true,
-    "noImplicitAny": true,
-    "module": "commonjs",
-    "target": "es5",
-    "allowJs": true,
-    "moduleResolution": "node",
+    "rootDir": "src",
+    "outDir": "dist",
+    // "sourceMap": true,
+    // "noImplicitAny": true,
+    // "module": "commonjs",
+    // "target": "es5",
+    // "allowJs": true,
+    // "moduleResolution": "node",
+    // "composite": true
     "types": ["node", "ws"],
-    "composite": true
   },
   "references": [{ "path": "../shared" }]
 }

@@ -14,6 +14,7 @@ import WebSocket = require('ws');
 export class Main {
   engine: Engine;
   wss: Server;
+  updateClients = true;
 
   public start(): void {
     let i = 0;
@@ -45,6 +46,7 @@ export class Main {
       ws.on('message', (message) => {
         const cmd = JSON.parse(message.toString()) as Command;
         console.log(`Received command ${cmd.type}`);
+        this.updateClients = true;
 
         if (cmd.type === ClientCommandType.MOVE_LEFT) {
           const moveLeftCmd = cmd as MoveLeftCommand;
@@ -64,6 +66,12 @@ export class Main {
   }
 
   update(): void {
+    if (!this.updateClients) {
+      return;
+    } else {
+      this.updateClients = false;
+    }
+
     const cmd: PlayersCommand = {
       type: ServerCommandType.PLAYERS,
       players: this.engine.players
