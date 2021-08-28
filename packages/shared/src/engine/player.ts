@@ -5,7 +5,10 @@ export class Player {
   y = 0;
   movingLeft = false;
   movingRight = false;
+  walkingSince: number;
   speed = PLAYER_BASE_SPEED;
+  orientation: 'LEFT' | 'RIGHT' = 'RIGHT';
+
 
   airborne = false;
   jumpTime = 0;
@@ -13,11 +16,15 @@ export class Player {
   constructor(public name: string) {}
 
   moveLeft(state: boolean): void {
+    this.orientation = 'LEFT';
     this.movingLeft = state;
+    this.walkingSince = new Date().getTime();
   }
 
   moveRight(state: boolean): void {
+    this.orientation = 'RIGHT';
     this.movingRight = state;
+    this.walkingSince = new Date().getTime();
   }
 
   jump(): void {

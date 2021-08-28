@@ -1,5 +1,11 @@
 import { Dict } from '@pixi/utils';
-import { Engine, PLAYER_SIZE, CELL_SIZE, Cell } from 'diggy-shared';
+import {
+  Engine,
+  CELL_SIZE,
+  Cell,
+  PLAYER_WIDTH,
+  PLAYER_HEIGHT
+} from 'diggy-shared';
 import {
   Application,
   Container,
@@ -25,9 +31,15 @@ export class Graphics {
       backgroundColor: 0x000000
     });
     this.app.loader
-      .add('player', 'player.png')
+      .add('player_stand', 'player_stand.png')
+      .add('player_walk_1', 'player_walk_1.png')
+      .add('player_walk_2', 'player_walk_2.png')
+      .add('player_walk_3', 'player_walk_3.png')
+      .add('player_jump', 'player_jump.png')
+      .add('player_fall', 'player_fall.png')
       .add('sky', 'sky.png')
       .add('stone', 'stone.png')
+      .add('dirt', 'dirt.png')
       .load((loader, resources) => {
         this.map = new Container();
         this.app.stage.addChild(this.map);
@@ -39,10 +51,10 @@ export class Graphics {
   }
 
   addPlayer(): void {
-    const player = new Sprite(this.app.loader.resources.player.texture);
+    const player = new Sprite(this.app.loader.resources.player_stand.texture);
     player.anchor.set(0.5, 0.5);
-    player.width = PLAYER_SIZE;
-    player.height = PLAYER_SIZE;
+    player.width = PLAYER_WIDTH;
+    player.height = PLAYER_HEIGHT;
     this.players.push(player);
     this.app.stage.addChild(player);
   }
@@ -71,12 +83,28 @@ export class Graphics {
     this.adjustPlayerCount();
 
     this.players.forEach((player, i) => {
+      const enginePlayer = this.engine.players[i];
+
+      if (enginePlayer.jumpTime > 0) {
+        player.texture = this.app.loader.resources.player_jump.texture;
+      } else if (enginePlayer.airborne) {
+        player.texture = this.app.loader.resources.player_stand.texture;
+      } else if (enginePlayer.movingLeft || enginePlayer.movingRight) {
+        const walkingSince = new Date().getTime() - enginePlayer.walkingSince;
+        const spriteNum = (Math.floor(walkingSince / 200) % 3) + 1;
+        player.texture =
+          this.app.loader.resources[`player_walk_${spriteNum}`].texture;
+      } else {
+        player.texture = this.app.loader.resources.player_stand.texture;
+      }
+      player.scale.x = enginePlayer.orientation === 'LEFT' ? 1 : -1;
+
       // update player location
-      player.x = this.engine.players[i].x;
-      player.y = this.engine.players[i].y;
+      player.x = enginePlayer.x;
+      player.y = enginePlayer.y;
 
       // center map around player
-      if (this.engine.players[i].name === this.login) {
+      if (enginePlayer.name === this.login) {
         this.app.stage.x = this.app.screen.width / 2 - this.players[i].x;
         this.app.stage.y = this.app.screen.height / 2 - this.players[i].y;
       }

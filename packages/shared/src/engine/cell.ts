@@ -1,11 +1,18 @@
 export enum CellTypes {
   sky = 'SKY',
   stone = 'STONE',
-  spawn = 'SPAWN'
+  spawn = 'SPAWN',
+  dirt = 'DIRT'
 }
 
 type CellTypeEntries = Record<CellTypes, CellType>;
 export const CELL_TYPES: CellTypeEntries = {
+  [CellTypes.dirt]: {
+    code: 'D',
+    name: 'Dirt',
+    isWall: true,
+    sprite: 'dirt'
+  },
   [CellTypes.stone]: {
     code: 'X',
     name: 'Stone',
@@ -22,7 +29,7 @@ export const CELL_TYPES: CellTypeEntries = {
     code: 'S',
     name: 'Spawn',
     isWall: false,
-    sprite: 'stone'
+    sprite: 'sky'
   }
 };
 

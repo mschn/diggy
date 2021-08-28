@@ -1,5 +1,5 @@
 import { Cell } from './cell';
-import { CELL_SIZE, GAME_LOOP_DELAY, PLAYER_SIZE } from './constants';
+import { CELL_SIZE, GAME_LOOP_DELAY, PLAYER_HEIGHT, PLAYER_WIDTH } from './constants';
 import { Map } from './map';
 import { Player } from './player';
 
@@ -50,19 +50,21 @@ export class Engine {
 
       // move left
       if (player.movingLeft) {
+        player.orientation = 'LEFT';
         x -= player.speed * dt;
-        const cell = this.map.getCell(x - PLAYER_SIZE / 2, y);
+        const cell = this.map.getCell(x - PLAYER_WIDTH / 2, y);
         if (cell.type.isWall) {
-          x = (cell.x + 1) * CELL_SIZE + 0.5 * PLAYER_SIZE;
+          x = (cell.x + 1) * CELL_SIZE + 0.5 * PLAYER_WIDTH;
         }
       }
 
       // move right
       if (player.movingRight) {
+        player.orientation = 'RIGHT';
         x += player.speed * dt;
-        const cell = this.map.getCell(x + PLAYER_SIZE / 2, y);
+        const cell = this.map.getCell(x + PLAYER_WIDTH / 2, y);
         if (cell.type.isWall) {
-          x = cell.x * CELL_SIZE - 0.5 * PLAYER_SIZE;
+          x = cell.x * CELL_SIZE - 0.5 * PLAYER_WIDTH;
         }
       }
 
@@ -81,7 +83,7 @@ export class Engine {
           if (ground) {
             // landing on the ground
             player.airborne = false;
-            y = ground.y * CELL_SIZE - 0.5 * PLAYER_SIZE;
+            y = ground.y * CELL_SIZE - 0.5 * PLAYER_HEIGHT;
           }
         }
       }
@@ -91,20 +93,20 @@ export class Engine {
         const groundBelow = this.getGroundBelow(x, y);
         player.airborne = !groundBelow;
         if (groundBelow) {
-          y = groundBelow.y * CELL_SIZE - 0.5 * PLAYER_SIZE;
+          y = groundBelow.y * CELL_SIZE - 0.5 * PLAYER_HEIGHT;
         }
       }
 
-      player.x = x;
-      player.y = y;
+      player.x = Math.round(x);
+      player.y = Math.round(y);
     });
 
     this.onTick?.();
   }
 
   getGroundBelow(x: number, y: number): Cell {
-    const cells = [x - PLAYER_SIZE / 2, x, x - 1 + PLAYER_SIZE / 2].map((tx) =>
-      this.map.getCell(tx, y + PLAYER_SIZE / 2)
+    const cells = [x - PLAYER_WIDTH / 2, x, x - 1 + PLAYER_WIDTH / 2].map((tx) =>
+      this.map.getCell(tx, y + PLAYER_HEIGHT / 2)
     );
     return cells.find((c) => c.type.isWall);
   }
