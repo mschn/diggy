@@ -4,7 +4,9 @@ import {
   CELL_SIZE,
   Cell,
   PLAYER_WIDTH,
-  PLAYER_HEIGHT
+  PLAYER_HEIGHT,
+  PlayerOrientation,
+  ClientCommandType
 } from 'diggy-shared';
 import {
   Application,
@@ -15,11 +17,12 @@ import {
 } from 'pixi.js';
 export class Graphics {
   login: string;
+  onCellClicked: (cell: Cell) => void;
 
   private app: Application;
   private players: Sprite[] = [];
   private map: Container;
-
+  private cells: Sprite[][] = [];
   private mouseOverOutline: PixiGraphics;
 
   constructor(private readonly engine: Engine) {}
@@ -65,6 +68,7 @@ export class Graphics {
 
   renderMap(resources: Dict<LoaderResource>): void {
     this.engine.map.cells.forEach((line, i) => {
+      const spriteRef = [];
       line.forEach((cell, j) => {
         const sprite = new Sprite(resources[cell.type.sprite].texture);
         sprite.x = CELL_SIZE * j;
@@ -72,11 +76,19 @@ export class Graphics {
         sprite.width = CELL_SIZE;
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
+        sprite.on('pointerdown', () => this.onCellClicked(cell));
         sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
         sprite.on('pointerout', () => this.mouseOutCell());
         this.map.addChild(sprite);
+        spriteRef.push(sprite);
       });
+      this.cells.push(spriteRef);
     });
+  }
+
+  updateCell(cell: Cell): void {
+    const sprite = this.cells[cell.y][cell.x];
+    sprite.texture = this.app.loader.resources[cell.type.sprite].texture;
   }
 
   update(): void {
@@ -90,14 +102,14 @@ export class Graphics {
       } else if (enginePlayer.airborne) {
         player.texture = this.app.loader.resources.player_stand.texture;
       } else if (enginePlayer.movingLeft || enginePlayer.movingRight) {
-        const walkingSince = new Date().getTime() - enginePlayer.walkingSince;
-        const spriteNum = (Math.floor(walkingSince / 200) % 3) + 1;
+        const spriteNum = (Math.floor(new Date().getTime() / 200) % 3) + 1;
         player.texture =
           this.app.loader.resources[`player_walk_${spriteNum}`].texture;
       } else {
         player.texture = this.app.loader.resources.player_stand.texture;
       }
-      player.scale.x = enginePlayer.orientation === 'LEFT' ? 1 : -1;
+      player.scale.x =
+        enginePlayer.orientation === PlayerOrientation.LEFT ? 1 : -1;
 
       // update player location
       player.x = enginePlayer.x;

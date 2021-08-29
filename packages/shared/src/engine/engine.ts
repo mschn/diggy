@@ -50,7 +50,6 @@ export class Engine {
 
       // move left
       if (player.movingLeft) {
-        player.orientation = 'LEFT';
         x -= player.speed * dt;
         const cell = this.map.getCell(x - PLAYER_WIDTH / 2, y);
         if (cell.type.isWall) {
@@ -60,7 +59,6 @@ export class Engine {
 
       // move right
       if (player.movingRight) {
-        player.orientation = 'RIGHT';
         x += player.speed * dt;
         const cell = this.map.getCell(x + PLAYER_WIDTH / 2, y);
         if (cell.type.isWall) {

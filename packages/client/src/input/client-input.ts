@@ -1,4 +1,9 @@
-import { ClientCommandType, Engine } from 'diggy-shared';
+import {
+  Cell,
+  ClientCommandType,
+  Engine,
+  PlayerOrientation
+} from 'diggy-shared';
 import { Ws } from './ws';
 
 export class ClientInput {
@@ -11,6 +16,7 @@ export class ClientInput {
     this.canvas = document.querySelector('#main canvas');
     document.addEventListener('keydown', this.onKeydown.bind(this));
     document.addEventListener('keyup', this.onKeyup.bind(this));
+    this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
   }
 
   onKeydown(e: KeyboardEvent): void {
@@ -19,6 +25,30 @@ export class ClientInput {
 
   onKeyup(e: KeyboardEvent): void {
     this.onKey(e, false);
+  }
+
+  onMouseMove(e: MouseEvent): void {
+    const orientation =
+      e.offsetX < this.canvas.width / 2
+        ? PlayerOrientation.LEFT
+        : PlayerOrientation.RIGHT;
+
+    if (this.engine.getPlayer(this.login).orientation !== orientation) {
+      this.ws.send({
+        type: ClientCommandType.LOOK,
+        payload: orientation.toString()
+      });
+    }
+  }
+
+  onCellClicked(cell: Cell): void {
+    if (!cell.type.isWall) {
+      return;
+    }
+    this.ws.send({
+      type: ClientCommandType.MINE,
+      payload: `${cell.x},${cell.y}`
+    });
   }
 
   onKey(e: KeyboardEvent, isKeyDown: boolean): void {
@@ -39,9 +69,8 @@ export class ClientInput {
     }
     this.ws.send({
       type: ClientCommandType.MOVE_LEFT,
-      start
+      payload: start ? '1' : '0'
     });
-    // this.engine.player.moveLeft(start);
   }
 
   moveRight(start: boolean): void {
@@ -50,9 +79,8 @@ export class ClientInput {
     }
     this.ws.send({
       type: ClientCommandType.MOVE_RIGHT,
-      start
+      payload: start ? '1' : '0'
     });
-    // this.engine.player.moveRight(start);
   }
 
   jump(start: boolean): void {
@@ -61,8 +89,7 @@ export class ClientInput {
     }
     this.ws.send({
       type: ClientCommandType.JUMP,
-      start
+      payload: start ? '1' : '0'
     });
-    // this.engine.player.jump();
   }
 }

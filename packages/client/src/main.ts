@@ -1,4 +1,4 @@
-import { Engine, Player } from 'diggy-shared';
+import { Cell, Engine, Player } from 'diggy-shared';
 import { Graphics } from './graphics/graphics';
 import { ClientInput } from './input/client-input';
 import { Ws } from './input/ws';
@@ -19,7 +19,10 @@ export class Main {
     this.ws.onMapLoaded = (mapStr) => this.onMapLoaded(mapStr);
     this.ws.onLoggedIn = (login) => this.onLoggedIn(login);
     this.ws.onPlayers = (players) => this.onPlayers(players);
+    this.ws.onCell = (cell) => this.onCell(cell);
     this.ws.start();
+
+    this.graphics.onCellClicked = (cell) => this.input.onCellClicked(cell);
   }
 
   private onLoggedIn(login: string): void {
@@ -38,5 +41,10 @@ export class Main {
 
   private onPlayers(players: Player[]): void {
     this.engine.players = players;
+  }
+
+  private onCell(cell: Cell): void {
+    this.engine.map.cells[cell.y][cell.x] = cell;
+    this.graphics.updateCell(cell);
   }
 }
