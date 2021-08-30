@@ -5,8 +5,18 @@ export class Map {
   cells: Cell[][];
 
   load(mapStr: string): void {
-    this.cells = mapStr.split('\n').map((line, i) =>
+    const lines = mapStr.split('\n');
+    this.cells = lines.map((line, i) =>
       line.split('').map((code, j) => {
+        if (
+          i === 0 ||
+          i === lines.length - 1 ||
+          j === 0 ||
+          j === line.length - 1
+        ) {
+          // unbreakable map boundaries
+          code = CELL_TYPES[CellTypes.UNBREAKABLE_STONE].code;
+        }
         const cell = new Cell();
         cell.type = getCellType(code);
         cell.x = j;
@@ -21,7 +31,7 @@ export class Map {
     let ret: Cell;
     this.cells.forEach((line, i) => {
       line.forEach((cell, j) => {
-        if (cell.type === CELL_TYPES.SPAWN) {
+        if (cell.type === CELL_TYPES[CellTypes.SPAWN]) {
           ret = cell;
         }
       });
@@ -44,7 +54,7 @@ export class Map {
     cell.hp -= 1;
     if (cell.hp === 0) {
       const c = new Cell();
-      c.type = CELL_TYPES[CellTypes.sky];
+      c.type = CELL_TYPES[CellTypes.SKY];
       c.x = x;
       c.y = y;
       c.hp = 0;

@@ -69,8 +69,8 @@ export class Main {
           const x = Number.parseInt(coords[0]);
           const y = Number.parseInt(coords[1]);
           const cell = this.engine.map.mine(x, y);
-
-          this.broadcast( {
+          console.log(cell);
+          this.broadcast({
             type: ServerCommandType.CELL,
             payload: cell.toString()
           });

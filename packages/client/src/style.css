@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
   height: 100%;
   width: 100%;
   border: 0;
@@ -12,19 +13,30 @@ body {
 }
 
 #main {
-  padding-top: 5rem;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
-#main canvas {
+#main #canvas-wrapper {
   border: 2px solid #ddd;
-  flex: 0 0;
+  flex: 1 0 100px;
+}
+
+#main #canvas-wrapper canvas {
+  width: 100%;
+  height: 100%;
 }
 
 #ui {
-  flex: .3 0;
-  border: 2px solid #ddd;
+  border: 2px solid #9e9e9e;
   padding: 2rem;
+  position: absolute;
+  background: #ffffff94;
+  right: 0;
+  bottom: 0;
+  width: 200px;
+  height: 50px;
 }

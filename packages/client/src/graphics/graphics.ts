@@ -1,19 +1,22 @@
 import { Dict } from '@pixi/utils';
 import {
-  Engine,
-  CELL_SIZE,
   Cell,
-  PLAYER_WIDTH,
-  PLAYER_HEIGHT,
+  CELL_SIZE,
+  Engine,
+  PICKAXE_RANGE,
   PlayerOrientation,
-  ClientCommandType
+  PLAYER_HEIGHT,
+  PLAYER_WIDTH
 } from 'diggy-shared';
 import {
   Application,
   Container,
+  Graphics as PixiGraphics,
   LoaderResource,
+  SCALE_MODES,
+  settings,
   Sprite,
-  Graphics as PixiGraphics
+  utils
 } from 'pixi.js';
 export class Graphics {
   login: string;
@@ -29,9 +32,22 @@ export class Graphics {
 
   start(): void {
     const canvas = document.querySelector('#main canvas') as HTMLCanvasElement;
+    const wrapper = document.querySelector('#canvas-wrapper') as HTMLDivElement;
+    const width = wrapper.clientWidth;
+    const height = wrapper.clientHeight;
+    window.addEventListener('resize', () => this.resizeCanvas());
+
+    settings.SCALE_MODE = SCALE_MODES.NEAREST;
+    settings.SCALE_MODE = SCALE_MODES.NEAREST;
+    settings.RENDER_OPTIONS.antialias = false;
+    settings.ROUND_PIXELS = true
+
     this.app = new Application({
       view: canvas,
-      backgroundColor: 0x000000
+      backgroundColor: 0x000000,
+      resolution: window.devicePixelRatio || 1,
+      width,
+      height
     });
     this.app.loader
       .add('player_stand', 'player_stand.png')
@@ -44,6 +60,7 @@ export class Graphics {
       .add('stone', 'stone.png')
       .add('dirt', 'dirt.png')
       .load((loader, resources) => {
+
         this.map = new Container();
         this.app.stage.addChild(this.map);
 
@@ -51,6 +68,13 @@ export class Graphics {
 
         this.app.ticker.add(() => this.update());
       });
+  }
+
+  resizeCanvas(): void {
+    const wrapper = document.querySelector('#canvas-wrapper') as HTMLDivElement;
+    const width = wrapper.clientWidth;
+    const height = wrapper.clientHeight;
+    this.app.renderer.resize(width, height);
   }
 
   addPlayer(): void {
@@ -143,8 +167,14 @@ export class Graphics {
     if (!cell.type.isWall) {
       return;
     }
+
+    const player = this.engine.getPlayer(this.login);
+    const color = this.engine.isInRange(cell, player, PICKAXE_RANGE)
+      ? '#ffffff'
+      : '#ff0000';
+
     this.mouseOverOutline = new PixiGraphics();
-    this.mouseOverOutline.lineStyle(1, 0xffffff, 1);
+    this.mouseOverOutline.lineStyle(1, utils.string2hex(color), 1);
     this.mouseOverOutline.drawRect(
       sprite.x,
       sprite.y,

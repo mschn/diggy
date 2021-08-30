@@ -2,6 +2,7 @@ import {
   Cell,
   ClientCommandType,
   Engine,
+  PICKAXE_RANGE,
   PlayerOrientation
 } from 'diggy-shared';
 import { Ws } from './ws';
@@ -32,8 +33,8 @@ export class ClientInput {
       e.offsetX < this.canvas.width / 2
         ? PlayerOrientation.LEFT
         : PlayerOrientation.RIGHT;
-
-    if (this.engine.getPlayer(this.login).orientation !== orientation) {
+    const player = this.engine.getPlayer(this.login);
+    if (player?.orientation !== orientation) {
       this.ws.send({
         type: ClientCommandType.LOOK,
         payload: orientation.toString()
@@ -45,6 +46,11 @@ export class ClientInput {
     if (!cell.type.isWall) {
       return;
     }
+    const player = this.engine.getPlayer(this.login);
+    if (!this.engine.isInRange(cell, player, PICKAXE_RANGE)) {
+      return;
+    }
+
     this.ws.send({
       type: ClientCommandType.MINE,
       payload: `${cell.x},${cell.y}`

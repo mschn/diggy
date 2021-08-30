@@ -1,29 +1,14 @@
 export enum CellTypes {
-  sky = 'SKY',
-  stone = 'STONE',
-  spawn = 'SPAWN',
-  dirt = 'DIRT'
+  SKY,
+  SPAWN,
+  DIRT,
+  STONE,
+  UNBREAKABLE_STONE
 }
 
 type CellTypeEntries = Record<CellTypes, CellType>;
 export const CELL_TYPES: CellTypeEntries = {
-  [CellTypes.dirt]: {
-    code: 'D',
-    name: 'Dirt',
-    isWall: true,
-    sprite: 'dirt',
-    hp: 1,
-    unbreakable: false
-  },
-  [CellTypes.stone]: {
-    code: 'X',
-    name: 'Stone',
-    isWall: true,
-    sprite: 'stone',
-    hp: 2,
-    unbreakable: false
-  },
-  [CellTypes.sky]: {
+  [CellTypes.SKY]: {
     code: ' ',
     name: 'Sky',
     isWall: false,
@@ -31,11 +16,35 @@ export const CELL_TYPES: CellTypeEntries = {
     hp: 0,
     unbreakable: true
   },
-  [CellTypes.spawn]: {
+  [CellTypes.SPAWN]: {
     code: 'S',
     name: 'Spawn',
     isWall: false,
     sprite: 'sky',
+    hp: 0,
+    unbreakable: true
+  },
+  [CellTypes.DIRT]: {
+    code: 'D',
+    name: 'Dirt',
+    isWall: true,
+    sprite: 'dirt',
+    hp: 1,
+    unbreakable: false
+  },
+  [CellTypes.STONE]: {
+    code: 'X',
+    name: 'Stone',
+    isWall: true,
+    sprite: 'stone',
+    hp: 2,
+    unbreakable: false
+  },
+  [CellTypes.UNBREAKABLE_STONE]: {
+    code: 'Z',
+    name: 'Unbreakable Stone',
+    isWall: true,
+    sprite: 'stone',
     hp: 0,
     unbreakable: true
   }
@@ -44,7 +53,7 @@ export const CELL_TYPES: CellTypeEntries = {
 export function getCellType(code: string): CellType {
   return (
     Object.values(CELL_TYPES).find((cellType) => cellType.code === code) ||
-    CELL_TYPES.SKY
+    CELL_TYPES[CellTypes.SKY]
   );
 }
 
@@ -64,7 +73,7 @@ export class Cell {
   hp: number;
 
   toString(): string {
-    const ret =  [this.type.code, this.x, this.y, this.hp].join(',');
+    const ret = [this.type.code, this.x, this.y, this.hp].join(',');
     console.log(ret);
     return ret;
   }

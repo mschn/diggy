@@ -7,6 +7,8 @@ export const PLAYER_WIDTH = 16;
 
 export const PLAYER_BASE_SPEED = 0.2;
 
+export const PICKAXE_RANGE = 2;
+
 export const STATIC_MAP =
   'X                                                                      X\n' +
   'X                                                                      X\n' +
