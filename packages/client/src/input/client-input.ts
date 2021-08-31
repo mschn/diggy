@@ -5,13 +5,14 @@ import {
   PICKAXE_RANGE,
   PlayerOrientation
 } from 'diggy-shared';
+import { UI } from '../graphics/ui';
 import { Ws } from './ws';
 
 export class ClientInput {
   canvas: HTMLCanvasElement;
   login: string;
 
-  constructor(private readonly engine: Engine, private readonly ws: Ws) {}
+  constructor(private readonly engine: Engine, private readonly ws: Ws, private readonly ui: UI) {}
 
   start(): void {
     this.canvas = document.querySelector('#main canvas');
@@ -66,6 +67,10 @@ export class ClientInput {
     }
     if ((e.key === 'w' || e.key === ' ') && isKeyDown) {
       this.jump(isKeyDown);
+    }
+    if (e.key === 'c' && isKeyDown) {
+      this.ui.toggle();
+      window.dispatchEvent(new Event('resize'));
     }
   }
 

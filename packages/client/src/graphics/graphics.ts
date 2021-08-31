@@ -18,6 +18,7 @@ import {
   Sprite,
   utils
 } from 'pixi.js';
+import { UI } from './ui';
 export class Graphics {
   login: string;
   onCellClicked: (cell: Cell) => void;
@@ -28,27 +29,43 @@ export class Graphics {
   private cells: Sprite[][] = [];
   private mouseOverOutline: PixiGraphics;
 
-  constructor(private readonly engine: Engine) {}
+  private canvas: HTMLCanvasElement;
+  private wrapper: HTMLDivElement;
+
+  constructor(private readonly engine: Engine, private readonly ui: UI) {}
 
   start(): void {
-    const canvas = document.querySelector('#main canvas') as HTMLCanvasElement;
-    const wrapper = document.querySelector('#canvas-wrapper') as HTMLDivElement;
-    const width = wrapper.clientWidth;
-    const height = wrapper.clientHeight;
+    this.canvas = document.querySelector('#main canvas') as HTMLCanvasElement;
+    this.wrapper = document.querySelector('#canvas-wrapper') as HTMLDivElement;
     window.addEventListener('resize', () => this.resizeCanvas());
 
+    this.initPixi();
+    this.loadTextures();
+    this.app.loader.load((loader, resources) => {
+      this.map = new Container();
+      this.app.stage.addChild(this.map);
+      this.renderMap(resources);
+      this.app.ticker.add(() => this.update());
+    });
+  }
+
+  initPixi(): void {
     settings.SCALE_MODE = SCALE_MODES.NEAREST;
     settings.SCALE_MODE = SCALE_MODES.NEAREST;
     settings.RENDER_OPTIONS.antialias = false;
-    settings.ROUND_PIXELS = true
-
+    settings.ROUND_PIXELS = true;
+    const width = this.wrapper.clientWidth;
+    const height = this.wrapper.clientHeight;
     this.app = new Application({
-      view: canvas,
+      view: this.canvas,
       backgroundColor: 0x000000,
       resolution: window.devicePixelRatio || 1,
       width,
       height
     });
+  }
+
+  loadTextures(): void {
     this.app.loader
       .add('player_stand', 'player_stand.png')
       .add('player_walk_1', 'player_walk_1.png')
@@ -58,16 +75,7 @@ export class Graphics {
       .add('player_fall', 'player_fall.png')
       .add('sky', 'sky.png')
       .add('stone', 'stone.png')
-      .add('dirt', 'dirt.png')
-      .load((loader, resources) => {
-
-        this.map = new Container();
-        this.app.stage.addChild(this.map);
-
-        this.renderMap(resources);
-
-        this.app.ticker.add(() => this.update());
-      });
+      .add('dirt', 'dirt.png');
   }
 
   resizeCanvas(): void {
@@ -75,19 +83,6 @@ export class Graphics {
     const width = wrapper.clientWidth;
     const height = wrapper.clientHeight;
     this.app.renderer.resize(width, height);
-  }
-
-  addPlayer(): void {
-    const player = new Sprite(this.app.loader.resources.player_stand.texture);
-    player.anchor.set(0.5, 0.5);
-    player.width = PLAYER_WIDTH;
-    player.height = PLAYER_HEIGHT;
-    this.players.push(player);
-    this.app.stage.addChild(player);
-  }
-
-  removePlayer(): void {
-    this.players.pop();
   }
 
   renderMap(resources: Dict<LoaderResource>): void {
@@ -156,10 +151,23 @@ export class Graphics {
     }
   }
 
+  addPlayer(): void {
+    const player = new Sprite(this.app.loader.resources.player_stand.texture);
+    player.anchor.set(0.5, 0.5);
+    player.width = PLAYER_WIDTH;
+    player.height = PLAYER_HEIGHT;
+    this.players.push(player);
+    this.app.stage.addChild(player);
+  }
+
+  removePlayer(): void {
+    this.players.pop();
+  }
+
   mouseOutCell(): void {
     if (this.mouseOverOutline) {
       this.map.removeChild(this.mouseOverOutline);
-      document.querySelector('#ui').innerHTML = '';
+      this.ui.clearInfo();
     }
   }
 
@@ -183,9 +191,6 @@ export class Graphics {
     );
     this.mouseOverOutline.endFill();
     this.map.addChild(this.mouseOverOutline);
-
-    document.querySelector(
-      '#ui'
-    ).innerHTML = `${cell.x}x${cell.y} : ${cell.type.name}`;
+    this.ui.showCellInfo(cell);
   }
 }

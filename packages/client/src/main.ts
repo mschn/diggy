@@ -1,5 +1,6 @@
 import { Cell, Engine, Player } from 'diggy-shared';
 import { Graphics } from './graphics/graphics';
+import { UI } from './graphics/ui';
 import { ClientInput } from './input/client-input';
 import { Ws } from './input/ws';
 
@@ -8,13 +9,15 @@ export class Main {
   graphics: Graphics;
   ws: Ws;
   input: ClientInput;
+  ui: UI;
   login: string;
 
   public start(): void {
     this.ws = new Ws();
     this.engine = new Engine();
-    this.graphics = new Graphics(this.engine);
-    this.input = new ClientInput(this.engine, this.ws);
+    this.ui = new UI();
+    this.graphics = new Graphics(this.engine, this.ui);
+    this.input = new ClientInput(this.engine, this.ws, this.ui);
 
     this.ws.onMapLoaded = (mapStr) => this.onMapLoaded(mapStr);
     this.ws.onLoggedIn = (login) => this.onLoggedIn(login);

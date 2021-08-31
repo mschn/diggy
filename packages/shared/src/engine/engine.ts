@@ -77,32 +77,23 @@ export class Engine {
         }
       }
 
-      if (player.airborne) {
-        // Jumping
-        if (player.jumpTime > 0) {
-          const jumpTime = Math.min(dt, player.jumpTime);
-          y -= player.speed * jumpTime;
-          player.jumpTime -= jumpTime;
+      // Jumping
+      if (player.airborne && player.jumpTime > 0) {
+        const jumpTime = Math.min(dt, player.jumpTime);
+        y -= player.speed * jumpTime;
+        player.jumpTime -= jumpTime;
 
-          const ceiling = this.map.getCell(x, y - PLAYER_HEIGHT / 2);
-          if (ceiling.type.isWall) {
-            y = ceiling.y * CELL_SIZE + 1 * PLAYER_HEIGHT;
-          }
-        }
-        // Falling
-        else {
-          y += player.speed * dt;
-          const ground = this.getGroundBelow(x, y);
-          if (ground) {
-            // landing on the ground
-            player.airborne = false;
-            y = ground.y * CELL_SIZE - 0.5 * PLAYER_HEIGHT;
-          }
+        const ceiling = this.map.getCell(x, y - PLAYER_HEIGHT / 2);
+        if (ceiling.type.isWall) {
+          y = ceiling.y * CELL_SIZE + 1 * PLAYER_HEIGHT;
         }
       }
 
-      // detect fall
+      // Fall
       if (player.jumpTime === 0) {
+        if (player.airborne) {
+          y += player.speed * dt;
+        }
         const groundBelow = this.getGroundBelow(x, y);
         player.airborne = !groundBelow;
         if (groundBelow) {
