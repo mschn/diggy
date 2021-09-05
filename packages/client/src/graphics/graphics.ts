@@ -4,9 +4,8 @@ import {
   CELL_SIZE,
   Engine,
   PICKAXE_RANGE,
-  PlayerOrientation,
-  PLAYER_HEIGHT,
-  PLAYER_WIDTH
+  Player,
+  PLAYER_HEIGHT
 } from 'diggy-shared';
 import {
   Application,
@@ -18,13 +17,14 @@ import {
   Sprite,
   utils
 } from 'pixi.js';
+import { PlayerGfx } from './player-gfx';
 import { UI } from './ui';
 export class Graphics {
   login: string;
   onCellClicked: (cell: Cell) => void;
 
   private app: Application;
-  private players: Sprite[] = [];
+  private playersGfx: PlayerGfx[] = [];
   private map: Container;
   private cells: Sprite[][] = [];
   private mouseOverOutline: PixiGraphics;
@@ -41,6 +41,7 @@ export class Graphics {
 
     this.initPixi();
     this.loadTextures();
+    
     this.app.loader.load((loader, resources) => {
       this.map = new Container();
       this.app.stage.addChild(this.map);
@@ -110,58 +111,41 @@ export class Graphics {
     sprite.texture = this.app.loader.resources[cell.type.sprite].texture;
   }
 
+  updatePlayers(players: Player[]): void {
+    this.playersGfx.forEach((pg) => {
+      players.forEach((p) => {
+        if (p.name === pg.player.name) {
+          pg.player = p;
+        }
+      });
+    });
+  }
+
   update(): void {
     this.adjustPlayerCount();
-
-    this.players.forEach((player, i) => {
-      const enginePlayer = this.engine.players[i];
-
-      if (enginePlayer.jumpTime > 0) {
-        player.texture = this.app.loader.resources.player_jump.texture;
-      } else if (enginePlayer.airborne) {
-        player.texture = this.app.loader.resources.player_stand.texture;
-      } else if (enginePlayer.movingLeft || enginePlayer.movingRight) {
-        const spriteNum = (Math.floor(new Date().getTime() / 200) % 3) + 1;
-        player.texture =
-          this.app.loader.resources[`player_walk_${spriteNum}`].texture;
-      } else {
-        player.texture = this.app.loader.resources.player_stand.texture;
-      }
-      player.scale.x =
-        enginePlayer.orientation === PlayerOrientation.LEFT ? 1 : -1;
-
-      // update player location
-      player.x = enginePlayer.x;
-      player.y = enginePlayer.y;
-
-      // center map around player
-      if (enginePlayer.name === this.login) {
-        this.app.stage.x = this.app.screen.width / 2 - this.players[i].x;
-        this.app.stage.y = this.app.screen.height / 2 - this.players[i].y;
-      }
+    this.playersGfx.forEach((player) => {
+      player.update();
+      player.centerAround(this.login);
     });
   }
 
   adjustPlayerCount(): void {
-    while (this.players.length < this.engine.players.length) {
-      this.addPlayer();
-    }
-    while (this.players.length > this.engine.players.length) {
-      this.removePlayer();
-    }
-  }
+    this.engine.players.find((pe) => {
+      if (!this.playersGfx.find((pg) => pg.player.name === pe.name)) {
+        console.log(`adding new player ${pe.name}`);
+        const newPlayerGfx = new PlayerGfx(this.app, pe);
+        this.playersGfx.push(newPlayerGfx);
+      }
+    });
 
-  addPlayer(): void {
-    const player = new Sprite(this.app.loader.resources.player_stand.texture);
-    player.anchor.set(0.5, 0.5);
-    player.width = PLAYER_WIDTH;
-    player.height = PLAYER_HEIGHT;
-    this.players.push(player);
-    this.app.stage.addChild(player);
-  }
-
-  removePlayer(): void {
-    this.players.pop();
+    this.playersGfx = this.playersGfx.filter(pg => {
+      if (!this.engine.players.find((pe) => pg.player.name === pe.name)) {
+        console.log(`removing player ${pg.player.name}`);
+        pg.cleanup();
+        return false;
+      }
+      return true;
+    });
   }
 
   mouseOutCell(): void {

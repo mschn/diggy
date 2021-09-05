@@ -44,6 +44,7 @@ export class Main {
 
   private onPlayers(players: Player[]): void {
     this.engine.players = players;
+    this.graphics.updatePlayers(players);
   }
 
   private onCell(cell: Cell): void {
