@@ -14,6 +14,7 @@ export class Player {
   orientation: PlayerOrientation = PlayerOrientation.RIGHT;
   airborne = false;
   jumpTime = 0;
+  attacking = false;
 
   constructor(public name: string) {}
 
@@ -45,7 +46,8 @@ export class Player {
       this.speed,
       this.orientation,
       this.airborne ? 1 : 0,
-      this.jumpTime
+      this.jumpTime,
+      this.attacking ? 1 : 0
     ].join(',');
   }
 
@@ -60,6 +62,7 @@ export class Player {
     ret.orientation = s[6] === '0' ? PlayerOrientation.LEFT : PlayerOrientation.RIGHT;
     ret.airborne = s[7] === '1';
     ret.jumpTime = Number.parseInt(s[8], 10);
+    ret.attacking = s[9] === '1';
     return ret;
   }
 }

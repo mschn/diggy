@@ -26,6 +26,7 @@ export class Main {
     this.ws.start();
 
     this.graphics.onCellClicked = (cell) => this.input.onCellClicked(cell);
+    this.graphics.onCellClickStop = () => this.input.onCellClickStop();
   }
 
   private onLoggedIn(login: string): void {

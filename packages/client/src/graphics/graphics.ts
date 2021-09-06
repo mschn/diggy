@@ -4,8 +4,7 @@ import {
   CELL_SIZE,
   Engine,
   PICKAXE_RANGE,
-  Player,
-  PLAYER_HEIGHT
+  Player
 } from 'diggy-shared';
 import {
   Application,
@@ -22,6 +21,7 @@ import { UI } from './ui';
 export class Graphics {
   login: string;
   onCellClicked: (cell: Cell) => void;
+  onCellClickStop: () => void;
 
   private app: Application;
   private playersGfx: PlayerGfx[] = [];
@@ -41,7 +41,7 @@ export class Graphics {
 
     this.initPixi();
     this.loadTextures();
-    
+
     this.app.loader.load((loader, resources) => {
       this.map = new Container();
       this.app.stage.addChild(this.map);
@@ -73,7 +73,20 @@ export class Graphics {
       .add('player_walk_2', 'player_walk_2.png')
       .add('player_walk_3', 'player_walk_3.png')
       .add('player_jump', 'player_jump.png')
-      .add('player_fall', 'player_fall.png')
+      .add('player_fall', 'player_fall.png');
+
+    this.app.loader
+      .add('p_body', 'p_body.png')
+      .add('p_head', 'p_head.png')
+      .add('p_larm', 'p_larm.png')
+      .add('p_leg', 'p_leg.png')
+      .add('p_leg_1', 'p_leg_1.png')
+      .add('p_leg_2', 'p_leg_2.png')
+      .add('p_rarm', 'p_rarm.png')
+      .add('p_rarm_1', 'p_rarm_1.png')
+      .add('p_rarm_2', 'p_rarm_2.png');
+
+    this.app.loader
       .add('sky', 'sky.png')
       .add('stone', 'stone.png')
       .add('dirt', 'dirt.png');
@@ -97,6 +110,7 @@ export class Graphics {
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
         sprite.on('pointerdown', () => this.onCellClicked(cell));
+        sprite.on('pointerup', () => this.onCellClickStop());
         sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
         sprite.on('pointerout', () => this.mouseOutCell());
         this.map.addChild(sprite);
@@ -138,7 +152,7 @@ export class Graphics {
       }
     });
 
-    this.playersGfx = this.playersGfx.filter(pg => {
+    this.playersGfx = this.playersGfx.filter((pg) => {
       if (!this.engine.players.find((pe) => pg.player.name === pe.name)) {
         console.log(`removing player ${pg.player.name}`);
         pg.cleanup();

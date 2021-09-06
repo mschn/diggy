@@ -56,7 +56,7 @@ export class Engine {
       // move left
       if (player.movingLeft) {
         x -= player.speed * dt;
-        const cells = [y - PLAYER_HEIGHT / 2, y].map((y) =>
+        const cells = [y - CELL_SIZE, y, y + CELL_SIZE].map((y) =>
           this.map.getCell(x - PLAYER_WIDTH / 2, y)
         );
         const wall = cells.find((c) => c.type.isWall);
@@ -68,7 +68,7 @@ export class Engine {
       // move right
       if (player.movingRight) {
         x += player.speed * dt;
-        const cells = [y - PLAYER_HEIGHT / 2, y].map((y) =>
+        const cells = [y - CELL_SIZE, y, y + CELL_SIZE].map((y) =>
           this.map.getCell(x + PLAYER_WIDTH / 2, y)
         );
         const wall = cells.find((c) => c.type.isWall);

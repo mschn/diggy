@@ -44,10 +44,11 @@ export class ClientInput {
   }
 
   onCellClicked(cell: Cell): void {
+    const player = this.engine.getPlayer(this.login);
+    player.attacking = true;
     if (!cell.type.isWall) {
       return;
     }
-    const player = this.engine.getPlayer(this.login);
     if (!this.engine.isInRange(cell, player, PICKAXE_RANGE)) {
       return;
     }
@@ -56,6 +57,11 @@ export class ClientInput {
       type: ClientCommandType.MINE,
       payload: `${cell.x},${cell.y}`
     });
+  }
+
+  onCellClickStop(): void {
+    console.log('stop');
+    this.engine.getPlayer(this.login).attacking = false;
   }
 
   onKey(e: KeyboardEvent, isKeyDown: boolean): void {
