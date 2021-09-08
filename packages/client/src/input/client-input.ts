@@ -5,14 +5,33 @@ import {
   PICKAXE_RANGE,
   PlayerOrientation
 } from 'diggy-shared';
+import { singleton } from 'tsyringe';
+import { EventService } from '../event-service';
 import { UI } from '../graphics/ui';
 import { Ws } from './ws';
 
+@singleton()
 export class ClientInput {
   canvas: HTMLCanvasElement;
   login: string;
 
-  constructor(private readonly engine: Engine, private readonly ws: Ws, private readonly ui: UI) {}
+  constructor(
+    private engine: Engine,
+    private ws: Ws,
+    private ui: UI,
+    private events: EventService
+  ) {
+    this.events.onCellClicked().subscribe((cell) => this.onCellClicked(cell));
+    this.events.onCellClickStop().subscribe(() => this.onCellClickStop());
+    this.events.onLoggedIn().subscribe((login) => (this.login = login));
+    this.events.onMapLoaded().subscribe(() => this.start());
+    this.events.onPlayers().subscribe((players) => {
+      this.engine.players = players;
+    });
+    this.events.onCell().subscribe((cell) => {
+      this.engine.map.cells[cell.y][cell.x] = cell;
+    });
+  }
 
   start(): void {
     this.canvas = document.querySelector('#main canvas');

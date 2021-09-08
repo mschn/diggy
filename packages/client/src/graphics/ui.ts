@@ -1,5 +1,7 @@
 import { Cell } from 'diggy-shared';
+import { singleton } from 'tsyringe';
 
+@singleton()
 export class UI {
   uiDom: HTMLDivElement;
   infoDom: HTMLDivElement;

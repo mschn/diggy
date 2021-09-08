@@ -1,3 +1,6 @@
+// used by tsyringe for dependency injection
+import 'reflect-metadata';
+
 import {
   ClientCommandType,
   Command,

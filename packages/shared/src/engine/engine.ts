@@ -1,3 +1,4 @@
+import { singleton } from 'tsyringe';
 import { Cell } from './cell';
 import {
   CELL_SIZE,
@@ -8,6 +9,7 @@ import {
 import { Map } from './map';
 import { Player } from './player';
 
+@singleton()
 export class Engine {
   map: Map;
   players: Player[] = [];

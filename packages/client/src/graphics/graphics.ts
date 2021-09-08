@@ -1,11 +1,5 @@
 import { Dict } from '@pixi/utils';
-import {
-  Cell,
-  CELL_SIZE,
-  Engine,
-  PICKAXE_RANGE,
-  Player
-} from 'diggy-shared';
+import { Cell, CELL_SIZE, Engine, PICKAXE_RANGE, Player } from 'diggy-shared';
 import {
   Application,
   Container,
@@ -16,12 +10,14 @@ import {
   Sprite,
   utils
 } from 'pixi.js';
+import { singleton } from 'tsyringe';
+import { EventService } from '../event-service';
 import { PlayerGfx } from './player-gfx';
 import { UI } from './ui';
+
+@singleton()
 export class Graphics {
   login: string;
-  onCellClicked: (cell: Cell) => void;
-  onCellClickStop: () => void;
 
   private app: Application;
   private playersGfx: PlayerGfx[] = [];
@@ -32,12 +28,20 @@ export class Graphics {
   private canvas: HTMLCanvasElement;
   private wrapper: HTMLDivElement;
 
-  constructor(private readonly engine: Engine, private readonly ui: UI) {}
+  constructor(
+    private engine: Engine,
+    private ui: UI,
+    private events: EventService
+  ) {}
 
   start(): void {
     this.canvas = document.querySelector('#main canvas') as HTMLCanvasElement;
     this.wrapper = document.querySelector('#canvas-wrapper') as HTMLDivElement;
     window.addEventListener('resize', () => this.resizeCanvas());
+
+    this.events.onLoggedIn().subscribe((login) => (this.login = login));
+    this.events.onPlayers().subscribe((players) => this.updatePlayers(players));
+    this.events.onCell().subscribe((cell) => this.updateCell(cell));
 
     this.initPixi();
     this.loadTextures();
@@ -109,8 +113,8 @@ export class Graphics {
         sprite.width = CELL_SIZE;
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
-        sprite.on('pointerdown', () => this.onCellClicked(cell));
-        sprite.on('pointerup', () => this.onCellClickStop());
+        sprite.on('pointerdown', () => this.events.cellClicked(cell));
+        sprite.on('pointerup', () => this.events.cellClickStop());
         sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
         sprite.on('pointerout', () => this.mouseOutCell());
         this.map.addChild(sprite);

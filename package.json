@@ -4,14 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start-shared": "cd packages/shared && npm run start",
     "start-client": "cd packages/client && npm run start",
     "start-server": "cd packages/server && npm run start"
   },
   "keywords": [],
   "author": "mathieu.schnoor@gmail.com",
   "license": "ISC",
-  "devDependencies": {},
   "workspaces": [
     "./packages/*"
-  ]
+  ],
+  "dependencies": {
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.3.0",
+    "tsyringe": "^4.6.0"
+  }
 }
