@@ -1,30 +1,40 @@
-import { Cell, Command, Player, ServerCommandType } from 'diggy-shared';
+import {
+  Cell,
+  Command,
+  GameState,
+  Player,
+  ServerCommandType
+} from 'diggy-shared';
 import { singleton } from 'tsyringe';
-import { EventService } from '../event-service';
+import { ClientState } from '../client-state';
 
 @singleton()
 export class Ws {
   wss: WebSocket;
 
-  constructor(private readonly eventService: EventService) {}
+  constructor(
+    private readonly clientState: ClientState,
+    private readonly gameState: GameState
+  ) {}
 
   start(): void {
     this.wss = new WebSocket('ws://localhost:8080/game');
     this.wss.onmessage = (event) => {
       const cmd = JSON.parse(event.data) as Command;
       if (cmd.type === ServerCommandType.MAP) {
-        this.eventService.mapLoaded(cmd.payload);
+        this.gameState.loadMap(cmd.payload);
       }
       if (cmd.type === ServerCommandType.LOGGED_IN) {
-        this.eventService.loggedIn(cmd.payload);
+        this.clientState.loggedIn(cmd.payload);
       }
       if (cmd.type === ServerCommandType.PLAYERS) {
-        this.eventService.players(
-          cmd.payload.split('\n').map((p) => Player.fromString(p))
-        );
+        const players = cmd.payload
+          .split('\n')
+          .map((p) => Player.fromString(p));
+        this.gameState.setPlayers(players);
       }
       if (cmd.type === ServerCommandType.CELL) {
-        this.eventService.cell(Cell.fromString(cmd.payload));
+        this.gameState.setCell(Cell.fromString(cmd.payload));
       }
     };
   }

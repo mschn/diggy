@@ -2,11 +2,11 @@
   "name": "diggy-server",
   "version": "0.0.0",
   "description": "",
-  "main": "dist/main.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "node": "node dist/main.js",
-    "start": "ts-node-dev --respawn -- src/main.ts"
+    "node": "node dist/server.js",
+    "start": "ts-node-dev --respawn -- src/server.ts"
   },
   "keywords": [],
   "author": "mathieu.schnoor@gmail.com",

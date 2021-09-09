@@ -1,14 +1,13 @@
-import { Engine } from 'diggy-shared';
-import { EventService } from './event-service';
+import { Engine, GameState } from 'diggy-shared';
+import { singleton } from 'tsyringe';
 import { Graphics } from './graphics/graphics';
 import { ClientInput } from './input/client-input';
 import { Ws } from './input/ws';
-import { singleton } from 'tsyringe';
 
 @singleton()
 export class Client {
   constructor(
-    private events: EventService,
+    private game: GameState,
     private engine: Engine,
     private input: ClientInput,
     private graphics: Graphics,
@@ -16,17 +15,14 @@ export class Client {
   ) {}
 
   public start(): void {
-
-    this.events.onMapLoaded().subscribe((map) => {
-      this.engine.loadMap(map);
-      this.engine.start();
-      this.input.start();
-      this.graphics.start();
+    this.game.getMap().subscribe((map) => {
+      if (map) {
+        this.engine.start();
+        this.input.start();
+        this.graphics.start();
+      }
     });
 
-
-
     this.ws.start();
-
   }
 }

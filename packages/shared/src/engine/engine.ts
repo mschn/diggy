@@ -6,23 +6,23 @@ import {
   PLAYER_HEIGHT,
   PLAYER_WIDTH
 } from './constants';
+import { GameState } from './game-state';
 import { Map } from './map';
 import { Player } from './player';
 
 @singleton()
 export class Engine {
-  map: Map;
-  players: Player[] = [];
-  lastUpdateTime = Date.now();
-  onTick: () => void;
+  private map: Map;
+  private players: Player[] = [];
+  private lastUpdateTime = Date.now();
+
+  constructor(private readonly state: GameState) {
+    this.state.getMap().subscribe((map) => (this.map = map));
+    this.state.getPlayers().subscribe((players) => (this.players = players));
+  }
 
   start(): void {
     setTimeout(() => this.update(), GAME_LOOP_DELAY);
-  }
-
-  loadMap(mapStr: string): void {
-    this.map = new Map();
-    this.map.load(mapStr);
   }
 
   spawnPlayer(name: string): void {
@@ -30,11 +30,11 @@ export class Engine {
     const spawn = this.map.getSpawn();
     player.x = spawn.x * CELL_SIZE;
     player.y = spawn.y * CELL_SIZE;
-    this.players.push(player);
+    this.state.addPlayer(player);
   }
 
   removePlayer(name: string): void {
-    this.players = this.players.filter((p) => p.name !== name);
+    this.state.removePlayer(name);
   }
 
   getPlayer(name: string): Player {
@@ -107,7 +107,7 @@ export class Engine {
       player.y = Math.round(y);
     });
 
-    this.onTick?.();
+    this.state.tick();
   }
 
   getGroundBelow(x: number, y: number): Cell {

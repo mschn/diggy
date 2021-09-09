@@ -1,5 +1,13 @@
 import { Dict } from '@pixi/utils';
-import { Cell, CELL_SIZE, Engine, PICKAXE_RANGE, Player } from 'diggy-shared';
+import {
+  Cell,
+  CELL_SIZE,
+  Engine,
+  GameState,
+  Map,
+  PICKAXE_RANGE,
+  Player
+} from 'diggy-shared';
 import {
   Application,
   Container,
@@ -11,7 +19,7 @@ import {
   utils
 } from 'pixi.js';
 import { singleton } from 'tsyringe';
-import { EventService } from '../event-service';
+import { ClientState } from '../client-state';
 import { PlayerGfx } from './player-gfx';
 import { UI } from './ui';
 
@@ -19,9 +27,12 @@ import { UI } from './ui';
 export class Graphics {
   login: string;
 
+  private players: Player[];
+  private map: Map;
+
   private app: Application;
   private playersGfx: PlayerGfx[] = [];
-  private map: Container;
+  private mapContainer: Container;
   private cells: Sprite[][] = [];
   private mouseOverOutline: PixiGraphics;
 
@@ -31,7 +42,8 @@ export class Graphics {
   constructor(
     private engine: Engine,
     private ui: UI,
-    private events: EventService
+    private clientState: ClientState,
+    private gameState: GameState
   ) {}
 
   start(): void {
@@ -39,16 +51,20 @@ export class Graphics {
     this.wrapper = document.querySelector('#canvas-wrapper') as HTMLDivElement;
     window.addEventListener('resize', () => this.resizeCanvas());
 
-    this.events.onLoggedIn().subscribe((login) => (this.login = login));
-    this.events.onPlayers().subscribe((players) => this.updatePlayers(players));
-    this.events.onCell().subscribe((cell) => this.updateCell(cell));
+    this.clientState.onLoggedIn().subscribe((login) => (this.login = login));
+
+    this.gameState
+      .getPlayers()
+      .subscribe((players) => this.updatePlayers(players));
+    this.gameState.getMap().subscribe((map) => (this.map = map));
+    this.gameState.onUpdateCell().subscribe((cell) => this.updateCell(cell));
 
     this.initPixi();
     this.loadTextures();
 
     this.app.loader.load((loader, resources) => {
-      this.map = new Container();
-      this.app.stage.addChild(this.map);
+      this.mapContainer = new Container();
+      this.app.stage.addChild(this.mapContainer);
       this.renderMap(resources);
       this.app.ticker.add(() => this.update());
     });
@@ -104,7 +120,7 @@ export class Graphics {
   }
 
   renderMap(resources: Dict<LoaderResource>): void {
-    this.engine.map.cells.forEach((line, i) => {
+    this.map.cells.forEach((line, i) => {
       const spriteRef = [];
       line.forEach((cell, j) => {
         const sprite = new Sprite(resources[cell.type.sprite].texture);
@@ -113,11 +129,11 @@ export class Graphics {
         sprite.width = CELL_SIZE;
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
-        sprite.on('pointerdown', () => this.events.cellClicked(cell));
-        sprite.on('pointerup', () => this.events.cellClickStop());
+        sprite.on('pointerdown', () => this.clientState.cellClicked(cell));
+        sprite.on('pointerup', () => this.clientState.cellClickStop());
         sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
         sprite.on('pointerout', () => this.mouseOutCell());
-        this.map.addChild(sprite);
+        this.mapContainer.addChild(sprite);
         spriteRef.push(sprite);
       });
       this.cells.push(spriteRef);
@@ -130,6 +146,7 @@ export class Graphics {
   }
 
   updatePlayers(players: Player[]): void {
+    this.players = players;
     this.playersGfx.forEach((pg) => {
       players.forEach((p) => {
         if (p.name === pg.player.name) {
@@ -148,7 +165,7 @@ export class Graphics {
   }
 
   adjustPlayerCount(): void {
-    this.engine.players.find((pe) => {
+    this.players.find((pe) => {
       if (!this.playersGfx.find((pg) => pg.player.name === pe.name)) {
         console.log(`adding new player ${pe.name}`);
         const newPlayerGfx = new PlayerGfx(this.app, pe);
@@ -157,7 +174,7 @@ export class Graphics {
     });
 
     this.playersGfx = this.playersGfx.filter((pg) => {
-      if (!this.engine.players.find((pe) => pg.player.name === pe.name)) {
+      if (!this.players.find((pe) => pg.player.name === pe.name)) {
         console.log(`removing player ${pg.player.name}`);
         pg.cleanup();
         return false;
@@ -168,7 +185,7 @@ export class Graphics {
 
   mouseOutCell(): void {
     if (this.mouseOverOutline) {
-      this.map.removeChild(this.mouseOverOutline);
+      this.mapContainer.removeChild(this.mouseOverOutline);
       this.ui.clearInfo();
     }
   }
@@ -192,7 +209,7 @@ export class Graphics {
       sprite.height
     );
     this.mouseOverOutline.endFill();
-    this.map.addChild(this.mouseOverOutline);
+    this.mapContainer.addChild(this.mouseOverOutline);
     this.ui.showCellInfo(cell);
   }
 }

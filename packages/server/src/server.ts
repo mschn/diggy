@@ -5,24 +5,39 @@ import {
   ClientCommandType,
   Command,
   Engine,
+  GameState,
+  Map,
+  Player,
   PlayerOrientation,
   ServerCommandType,
   STATIC_MAP
 } from 'diggy-shared';
+import { container, singleton } from 'tsyringe';
 import { Server } from 'ws';
+
 import WebSocket = require('ws');
 
-export class Main {
-  engine: Engine;
-  wss: Server;
-  updateClients = false;
+@singleton()
+export class DiggyServer {
+  private wss: Server;
+  private updateClients = false;
+
+  private map: Map;
+  private players: Player[];
+
+  constructor(
+    private readonly engine: Engine,
+    private readonly state: GameState
+  ) {
+    this.state.getMap().subscribe((map) => (this.map = map));
+    this.state.getPlayers().subscribe((players) => (this.players = players));
+  }
 
   public start(): void {
     let i = 0;
 
-    this.engine = new Engine();
-    this.engine.onTick = () => this.update();
-    this.engine.loadMap(STATIC_MAP);
+    this.state.onTick().subscribe(() => this.update());
+    this.state.loadMap(STATIC_MAP);
     this.engine.start();
 
     this.wss = new Server({ port: 8080, path: '/game' });
@@ -37,7 +52,7 @@ export class Main {
       });
       this.send(ws, {
         type: ServerCommandType.MAP,
-        payload: this.engine.map.toString()
+        payload: this.map.toString()
       });
 
       ws.on('message', (message) => {
@@ -71,7 +86,11 @@ export class Main {
           const coords = cmd.payload.split(',');
           const x = Number.parseInt(coords[0]);
           const y = Number.parseInt(coords[1]);
-          const cell = this.engine.map.mine(x, y);
+
+          // FIXME ? does this need to update reference ?
+
+          const cell = this.map.mine(x, y);
+          this.state.setCell(cell);
           console.log(cell);
           this.broadcast({
             type: ServerCommandType.CELL,
@@ -95,7 +114,7 @@ export class Main {
     }
     this.broadcast({
       type: ServerCommandType.PLAYERS,
-      payload: this.engine.players.map((p) => p.toString()).join('\n')
+      payload: this.players.map((p) => p.toString()).join('\n')
     });
   }
 
@@ -113,4 +132,6 @@ export class Main {
   }
 }
 
-new Main().start();
+const server = container.resolve(DiggyServer);
+server.start();
+// new Main().start();

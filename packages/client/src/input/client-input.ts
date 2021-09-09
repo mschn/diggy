@@ -2,11 +2,14 @@ import {
   Cell,
   ClientCommandType,
   Engine,
+  GameState,
+  Map,
   PICKAXE_RANGE,
+  Player,
   PlayerOrientation
 } from 'diggy-shared';
 import { singleton } from 'tsyringe';
-import { EventService } from '../event-service';
+import { ClientState } from '../client-state';
 import { UI } from '../graphics/ui';
 import { Ws } from './ws';
 
@@ -14,23 +17,21 @@ import { Ws } from './ws';
 export class ClientInput {
   canvas: HTMLCanvasElement;
   login: string;
+  players: Player[];
+  map: Map;
 
   constructor(
     private engine: Engine,
     private ws: Ws,
     private ui: UI,
-    private events: EventService
+    private state: ClientState,
+    private game: GameState
   ) {
-    this.events.onCellClicked().subscribe((cell) => this.onCellClicked(cell));
-    this.events.onCellClickStop().subscribe(() => this.onCellClickStop());
-    this.events.onLoggedIn().subscribe((login) => (this.login = login));
-    this.events.onMapLoaded().subscribe(() => this.start());
-    this.events.onPlayers().subscribe((players) => {
-      this.engine.players = players;
-    });
-    this.events.onCell().subscribe((cell) => {
-      this.engine.map.cells[cell.y][cell.x] = cell;
-    });
+    this.game.getPlayers().subscribe(players => this.players = players);
+    this.game.getMap().subscribe(map => this.map = map);
+    this.state.onCellClicked().subscribe((cell) => this.onCellClicked(cell));
+    this.state.onCellClickStop().subscribe(() => this.onCellClickStop());
+    this.state.onLoggedIn().subscribe((login) => (this.login = login));
   }
 
   start(): void {
