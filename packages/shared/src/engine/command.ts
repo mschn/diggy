@@ -8,7 +8,7 @@ export enum ClientCommandType {
   MOVE_RIGHT,
   JUMP,
   LOOK,
-  MINE
+  ATTACK
 }
 
 export enum ServerCommandType {

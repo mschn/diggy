@@ -15,6 +15,9 @@ export class Player {
   airborne = false;
   jumpTime = 0;
   attacking = false;
+  lastAttack = 0;
+  lookX = 0;
+  lookY = 0;
 
   constructor(public name: string) {}
 
@@ -47,7 +50,10 @@ export class Player {
       this.orientation,
       this.airborne ? 1 : 0,
       this.jumpTime,
-      this.attacking ? 1 : 0
+      this.attacking ? 1 : 0,
+      this.lastAttack,
+      this.lookX,
+      this.lookY
     ].join(',');
   }
 
@@ -59,10 +65,14 @@ export class Player {
     ret.movingLeft = s[3] === '1';
     ret.movingRight = s[4] === '1';
     ret.speed = Number.parseFloat(s[5]);
-    ret.orientation = s[6] === '0' ? PlayerOrientation.LEFT : PlayerOrientation.RIGHT;
+    ret.orientation =
+      s[6] === '0' ? PlayerOrientation.LEFT : PlayerOrientation.RIGHT;
     ret.airborne = s[7] === '1';
     ret.jumpTime = Number.parseInt(s[8], 10);
     ret.attacking = s[9] === '1';
+    ret.lastAttack = Number.parseInt(s[10]);
+    ret.lookX = Number.parseInt(s[11]);
+    ret.lookY = Number.parseInt(s[12]);
     return ret;
   }
 }

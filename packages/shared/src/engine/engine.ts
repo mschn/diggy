@@ -1,4 +1,5 @@
 import { singleton } from 'tsyringe';
+import { PICKAXE_RANGE } from '..';
 import { Cell } from './cell';
 import {
   CELL_SIZE,
@@ -54,6 +55,24 @@ export class Engine {
     this.players?.forEach((player) => {
       let x = player.x;
       let y = player.y;
+
+      // attack
+      if (player.attacking) {
+        const now = new Date().getTime();
+
+        // 1 attack per second
+        if (now - player.lastAttack > 1000) {
+          console.log(`${player.name} mine ${player.lookX} ${player.lookY}`);
+          player.lastAttack = now;
+          const lookCell = this.map.cells[player.lookY]?.[player.lookX];
+          if (this.isInRange(lookCell, player, PICKAXE_RANGE)) {
+            const cell = this.map.mine(player.lookX, player.lookY);
+            this.state.setCell(cell);
+          } else {
+            console.log('not in range')
+          }
+        }
+      }
 
       // move left
       if (player.movingLeft) {
@@ -118,6 +137,9 @@ export class Engine {
   }
 
   isInRange(cell: Cell, player: Player, range: number): boolean {
+    if (!cell) {
+      return false;
+    }
     const dx = Math.abs(player.x - (cell.x + 0.5) * CELL_SIZE);
     const dy = Math.abs(player.y - cell.y * CELL_SIZE);
     return dx <= CELL_SIZE * range && dy <= CELL_SIZE * range;

@@ -31,6 +31,12 @@ export class DiggyServer {
   ) {
     this.state.getMap().subscribe((map) => (this.map = map));
     this.state.getPlayers().subscribe((players) => (this.players = players));
+    this.state.onCell().subscribe((cell) => {
+      this.broadcast({
+        type: ServerCommandType.CELL,
+        payload: cell.toString()
+      });
+    });
   }
 
   public start(): void {
@@ -57,45 +63,39 @@ export class DiggyServer {
 
       ws.on('message', (message) => {
         const cmd = JSON.parse(message.toString()) as Command;
+        const player = this.engine.getPlayer(name);
         console.log(`Received command ${cmd.type} : ${cmd.payload}`);
         this.updateClients = true;
 
         // MOVE LEFT
         if (cmd.type === ClientCommandType.MOVE_LEFT) {
-          this.engine.getPlayer(name).moveLeft(cmd.payload === '1');
+          player.moveLeft(cmd.payload === '1');
           console.log('move left', message.toString());
         }
         // MOVE RIGHT
         if (cmd.type === ClientCommandType.MOVE_RIGHT) {
-          this.engine.getPlayer(name).moveRight(cmd.payload === '1');
+          player.moveRight(cmd.payload === '1');
           console.log('move right', message.toString());
         }
         // JUMP
         if (cmd.type === ClientCommandType.JUMP) {
-          this.engine.getPlayer(name).jump();
+          player.jump();
         }
         // LOOK
         if (cmd.type === ClientCommandType.LOOK) {
-          this.engine.getPlayer(name).orientation =
-            cmd.payload === '0'
-              ? PlayerOrientation.LEFT
-              : PlayerOrientation.RIGHT;
-        }
-        // MINE
-        if (cmd.type === ClientCommandType.MINE) {
           const coords = cmd.payload.split(',');
           const x = Number.parseInt(coords[0]);
           const y = Number.parseInt(coords[1]);
+          player.lookX = x;
+          player.lookY = y;
+          const pcell = this.map.getCell(player.x, player.y);
+          player.orientation =
+            x < pcell.x ? PlayerOrientation.LEFT : PlayerOrientation.RIGHT;
+        }
 
-          // FIXME ? does this need to update reference ?
-
-          const cell = this.map.mine(x, y);
-          this.state.setCell(cell);
-          console.log(cell);
-          this.broadcast({
-            type: ServerCommandType.CELL,
-            payload: cell.toString()
-          });
+        // ATTACK
+        if (cmd.type === ClientCommandType.ATTACK) {
+          player.attacking = cmd.payload === '1';
         }
       });
 

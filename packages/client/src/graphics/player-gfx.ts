@@ -67,7 +67,7 @@ export class PlayerGfx {
       this.legs.texture = this.app.loader.resources.p_leg.texture;
     }
 
-    // MINE
+    // ATTACK
     if (this.player.attacking) {
       const spriteNum = (Math.floor(new Date().getTime() / 200) % 2) + 1;
       this.rarm.texture =

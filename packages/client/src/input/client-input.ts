@@ -3,10 +3,7 @@ import {
   ClientCommandType,
   Engine,
   GameState,
-  Map,
-  PICKAXE_RANGE,
-  Player,
-  PlayerOrientation
+  Map, Player
 } from 'diggy-shared';
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
@@ -27,10 +24,14 @@ export class ClientInput {
     private state: ClientState,
     private game: GameState
   ) {
-    this.game.getPlayers().subscribe(players => this.players = players);
-    this.game.getMap().subscribe(map => this.map = map);
-    this.state.onCellClicked().subscribe((cell) => this.onCellClicked(cell));
-    this.state.onCellClickStop().subscribe(() => this.onCellClickStop());
+    this.game.getPlayers().subscribe((players) => (this.players = players));
+    this.game.getMap().subscribe((map) => (this.map = map));
+
+    this.state.onCellHovered().subscribe((cell) => this.onCellHovered(cell));
+    this.state
+      .onMouseDown()
+      .subscribe((mouseDown) => this.onMouseDown(mouseDown));
+
     this.state.onLoggedIn().subscribe((login) => (this.login = login));
   }
 
@@ -38,7 +39,6 @@ export class ClientInput {
     this.canvas = document.querySelector('#main canvas');
     document.addEventListener('keydown', this.onKeydown.bind(this));
     document.addEventListener('keyup', this.onKeyup.bind(this));
-    this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
   }
 
   onKeydown(e: KeyboardEvent): void {
@@ -49,33 +49,23 @@ export class ClientInput {
     this.onKey(e, false);
   }
 
-  onMouseMove(e: MouseEvent): void {
-    const orientation =
-      e.offsetX < this.canvas.width / 2
-        ? PlayerOrientation.LEFT
-        : PlayerOrientation.RIGHT;
+  onCellHovered(cell: Cell): void {
+    if (!cell) {
+      return;
+    }
     const player = this.engine.getPlayer(this.login);
-    if (player?.orientation !== orientation) {
+    if (player.lookX !== cell.x || player.lookY !== cell.y) {
       this.ws.send({
         type: ClientCommandType.LOOK,
-        payload: orientation.toString()
+        payload: `${cell.x},${cell.y}`
       });
     }
   }
 
-  onCellClicked(cell: Cell): void {
-    const player = this.engine.getPlayer(this.login);
-    player.attacking = true;
-    if (!cell.type.isWall) {
-      return;
-    }
-    if (!this.engine.isInRange(cell, player, PICKAXE_RANGE)) {
-      return;
-    }
-
+  onMouseDown(mouseDown: boolean): void {
     this.ws.send({
-      type: ClientCommandType.MINE,
-      payload: `${cell.x},${cell.y}`
+      type: ClientCommandType.ATTACK,
+      payload: mouseDown ? '1' : '0'
     });
   }
 

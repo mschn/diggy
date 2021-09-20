@@ -21,7 +21,6 @@ import {
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
 import { PlayerGfx } from './player-gfx';
-import { UI } from './ui';
 
 @singleton()
 export class Graphics {
@@ -41,7 +40,6 @@ export class Graphics {
 
   constructor(
     private engine: Engine,
-    private ui: UI,
     private clientState: ClientState,
     private gameState: GameState
   ) {}
@@ -50,6 +48,12 @@ export class Graphics {
     this.canvas = document.querySelector('#main canvas') as HTMLCanvasElement;
     this.wrapper = document.querySelector('#canvas-wrapper') as HTMLDivElement;
     window.addEventListener('resize', () => this.resizeCanvas());
+    this.canvas.addEventListener('pointerdown', () =>
+      this.clientState.mouseDown(true)
+    );
+    this.canvas.addEventListener('pointerup', () =>
+      this.clientState.mouseDown(false)
+    );
 
     this.clientState.onLoggedIn().subscribe((login) => (this.login = login));
 
@@ -129,8 +133,6 @@ export class Graphics {
         sprite.width = CELL_SIZE;
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
-        sprite.on('pointerdown', () => this.clientState.cellClicked(cell));
-        sprite.on('pointerup', () => this.clientState.cellClickStop());
         sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
         sprite.on('pointerout', () => this.mouseOutCell());
         this.mapContainer.addChild(sprite);
@@ -186,7 +188,7 @@ export class Graphics {
   mouseOutCell(): void {
     if (this.mouseOverOutline) {
       this.mapContainer.removeChild(this.mouseOverOutline);
-      this.ui.clearInfo();
+      this.clientState.hoverCell(null);
     }
   }
 
@@ -210,6 +212,7 @@ export class Graphics {
     );
     this.mouseOverOutline.endFill();
     this.mapContainer.addChild(this.mouseOverOutline);
-    this.ui.showCellInfo(cell);
+
+    this.clientState.hoverCell(cell);
   }
 }

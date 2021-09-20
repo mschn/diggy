@@ -1,5 +1,5 @@
+import { Cell } from 'diggy-shared';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { Cell, Player } from 'diggy-shared';
 import { singleton } from 'tsyringe';
 
 @singleton()
@@ -7,8 +7,9 @@ export class ClientState {
   private _loggedIn = new BehaviorSubject<string>(undefined);
   // TODO change name to be more 'cellFromServer'
   private _cell = new Subject<Cell>();
-  private _cellClicked = new Subject<Cell>();
-  private _cellClickStop = new Subject<void>();
+
+  private _mouseDown = new Subject<boolean>();
+  private _cellHovered = new Subject<Cell>();
 
   loggedIn(login: string): void {
     this._loggedIn.next(login);
@@ -17,17 +18,17 @@ export class ClientState {
     return this._loggedIn.asObservable();
   }
 
-  cellClicked(cell: Cell): void {
-    this._cellClicked.next(cell);
+  mouseDown(state: boolean): void {
+    this._mouseDown.next(state);
   }
-  onCellClicked(): Observable<Cell> {
-    return this._cellClicked.asObservable();
+  onMouseDown(): Observable<boolean> {
+    return this._mouseDown.asObservable();
   }
 
-  cellClickStop(): void {
-    this._cellClickStop.next();
+  hoverCell(cell: Cell): void {
+    this._cellHovered.next(cell);
   }
-  onCellClickStop(): Observable<void> {
-    return this._cellClickStop.asObservable();
+  onCellHovered(): Observable<Cell> {
+    return this._cellHovered.asObservable();
   }
 }
