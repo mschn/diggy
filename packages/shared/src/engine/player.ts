@@ -22,12 +22,10 @@ export class Player {
   constructor(public name: string) {}
 
   moveLeft(state: boolean): void {
-    this.orientation = PlayerOrientation.LEFT;
     this.movingLeft = state;
   }
 
   moveRight(state: boolean): void {
-    this.orientation = PlayerOrientation.RIGHT;
     this.movingRight = state;
   }
 

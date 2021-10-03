@@ -70,7 +70,6 @@ export class ClientInput {
   }
 
   onCellClickStop(): void {
-    console.log('stop');
     this.engine.getPlayer(this.login).attacking = false;
   }
 

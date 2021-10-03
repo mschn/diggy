@@ -6,7 +6,8 @@ import {
   GameState,
   Map,
   PICKAXE_RANGE,
-  Player
+  Player,
+  Stats
 } from 'diggy-shared';
 import {
   Application,
@@ -15,8 +16,7 @@ import {
   LoaderResource,
   SCALE_MODES,
   settings,
-  Sprite,
-  utils
+  Sprite, utils
 } from 'pixi.js';
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
@@ -41,7 +41,8 @@ export class Graphics {
   constructor(
     private engine: Engine,
     private clientState: ClientState,
-    private gameState: GameState
+    private gameState: GameState,
+    private stats: Stats
   ) {}
 
   start(): void {
@@ -193,10 +194,6 @@ export class Graphics {
   }
 
   mouseOverCell(cell: Cell, sprite: Sprite): void {
-    if (!cell.type.isWall) {
-      return;
-    }
-
     const player = this.engine.getPlayer(this.login);
     const color = this.engine.isInRange(cell, player, PICKAXE_RANGE)
       ? '#ffffff'

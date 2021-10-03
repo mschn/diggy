@@ -3,7 +3,8 @@ import {
   Command,
   GameState,
   Player,
-  ServerCommandType
+  ServerCommandType,
+  Stats
 } from 'diggy-shared';
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
@@ -14,13 +15,18 @@ export class Ws {
 
   constructor(
     private readonly clientState: ClientState,
-    private readonly gameState: GameState
-  ) {}
+    private readonly gameState: GameState,
+    private readonly stats: Stats
+  ) {
+    this.stats.start();
+  }
 
   start(): void {
     this.wss = new WebSocket('ws://localhost:8080/game');
     this.wss.onmessage = (event) => {
       const cmd = JSON.parse(event.data) as Command;
+      this.stats.recordIn(event.data.length);
+
       if (cmd.type === ServerCommandType.MAP) {
         this.gameState.loadMap(cmd.payload);
       }
@@ -40,6 +46,8 @@ export class Ws {
   }
 
   send<C extends Command>(command: C): void {
-    this.wss.send(JSON.stringify(command));
+    const s = JSON.stringify(command);
+    this.stats.recordOut(s.length);
+    this.wss.send(s);
   }
 }

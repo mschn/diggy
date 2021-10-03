@@ -40,3 +40,13 @@ body {
 .d-none {
   display: none;
 }
+
+#stats {
+  position: absolute;
+  color: white;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 5px;
+  text-shadow: 1px 1px 2px black;
+  user-select: none;
+}

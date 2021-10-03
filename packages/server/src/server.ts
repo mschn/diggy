@@ -1,6 +1,4 @@
-// used by tsyringe for dependency injection
 import 'reflect-metadata';
-
 import {
   ClientCommandType,
   Command,
@@ -10,7 +8,8 @@ import {
   Player,
   PlayerOrientation,
   ServerCommandType,
-  STATIC_MAP
+  STATIC_MAP,
+  Stats
 } from 'diggy-shared';
 import { container, singleton } from 'tsyringe';
 import { Server } from 'ws';
@@ -25,10 +24,20 @@ export class DiggyServer {
   private map: Map;
   private players: Player[];
 
+  private LOG_STATS = false;
+  private LOG_COMMANDS = true;
+
   constructor(
     private readonly engine: Engine,
-    private readonly state: GameState
+    private readonly state: GameState,
+    private readonly stats: Stats
   ) {
+    this.stats.start();
+    this.stats.getNetStats().subscribe((netStats) => {
+      if (this.LOG_STATS) {
+        console.log(`## ${netStats.formatIn()} | ${netStats.formatOut()}`);
+      }
+    });
     this.state.getMap().subscribe((map) => (this.map = map));
     this.state.getPlayers().subscribe((players) => (this.players = players));
     this.state.onCell().subscribe((cell) => {
@@ -64,18 +73,21 @@ export class DiggyServer {
       ws.on('message', (message) => {
         const cmd = JSON.parse(message.toString()) as Command;
         const player = this.engine.getPlayer(name);
-        console.log(`Received command ${cmd.type} : ${cmd.payload}`);
+        if (this.LOG_STATS) {
+          this.stats.recordIn(message.toString().length);
+        }
+        if (this.LOG_COMMANDS) {
+          console.log(`Received command ${cmd.type} : ${cmd.payload}`);
+        }
         this.updateClients = true;
 
         // MOVE LEFT
         if (cmd.type === ClientCommandType.MOVE_LEFT) {
           player.moveLeft(cmd.payload === '1');
-          console.log('move left', message.toString());
         }
         // MOVE RIGHT
         if (cmd.type === ClientCommandType.MOVE_RIGHT) {
           player.moveRight(cmd.payload === '1');
-          console.log('move right', message.toString());
         }
         // JUMP
         if (cmd.type === ClientCommandType.JUMP) {
@@ -112,9 +124,11 @@ export class DiggyServer {
     } else {
       this.updateClients = false;
     }
+    const payload = this.players.map((p) => p.toString()).join('\n');
+    this.stats.recordOut(payload.length);
     this.broadcast({
       type: ServerCommandType.PLAYERS,
-      payload: this.players.map((p) => p.toString()).join('\n')
+      payload: payload
     });
   }
 
