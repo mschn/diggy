@@ -41,7 +41,7 @@ body {
   display: none;
 }
 
-#stats {
+#net-stats {
   position: absolute;
   color: white;
   font-family: monospace;

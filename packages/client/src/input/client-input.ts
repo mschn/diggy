@@ -7,7 +7,7 @@ import {
 } from 'diggy-shared';
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
-import { UI } from '../graphics/ui';
+import { UI } from '../ui/ui';
 import { Ws } from './ws';
 
 @singleton()

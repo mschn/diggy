@@ -6,8 +6,7 @@ import {
   GameState,
   Map,
   PICKAXE_RANGE,
-  Player,
-  Stats
+  Player
 } from 'diggy-shared';
 import {
   Application,
@@ -16,7 +15,8 @@ import {
   LoaderResource,
   SCALE_MODES,
   settings,
-  Sprite, utils
+  Sprite,
+  utils
 } from 'pixi.js';
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
@@ -41,8 +41,7 @@ export class Graphics {
   constructor(
     private engine: Engine,
     private clientState: ClientState,
-    private gameState: GameState,
-    private stats: Stats
+    private gameState: GameState
   ) {}
 
   start(): void {
