@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { Stats, NetworkStat } from 'diggy-shared';
 
-interface NetStatProp {
+interface IProp {
   stats: Stats
 }
 
-interface NetStatState {
+interface IState {
   stats: NetworkStat
 }
 
-export class NetStatView extends React.Component<NetStatProp, NetStatState> {
+export class NetStatView extends React.Component<IProp, IState> {
 
   componentDidMount(): void {
     this.props.stats.getNetStats().subscribe((stats) => {

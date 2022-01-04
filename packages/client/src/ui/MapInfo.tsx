@@ -1,16 +1,16 @@
-import * as React from 'react';
 import { Cell } from 'diggy-shared';
+import * as React from 'react';
 import { ClientState } from '../client-state';
 
-interface MapInfoProp {
+interface IProp {
   clientState: ClientState;
 }
 
-interface MapInfoState {
+interface IState {
   cell: Cell;
 }
 
-export class MapInfo extends React.Component<MapInfoProp, MapInfoState> {
+export class MapInfo extends React.Component<IProp, IState> {
   componentDidMount(): void {
     this.props.clientState
       .onCellHovered()
