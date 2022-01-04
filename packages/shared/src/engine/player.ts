@@ -1,3 +1,4 @@
+import { Cell, CELL_SIZE } from '..';
 import { PLAYER_BASE_SPEED } from './constants';
 
 export enum PlayerOrientation {
@@ -35,6 +36,15 @@ export class Player {
     }
     this.airborne = true;
     this.jumpTime = 300;
+  }
+
+  isCellInRange(cell: Cell, range: number): boolean {
+    if (!cell) {
+      return false;
+    }
+    const dx = Math.abs(this.x - (cell.x + 0.5) * CELL_SIZE);
+    const dy = Math.abs(this.y - cell.y * CELL_SIZE);
+    return dx <= CELL_SIZE * range && dy <= CELL_SIZE * range;
   }
 
   toString(): string {

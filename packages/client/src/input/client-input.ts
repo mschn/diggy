@@ -1,10 +1,4 @@
-import {
-  Cell,
-  ClientCommandType,
-  Engine,
-  GameState,
-  Map, Player
-} from 'diggy-shared';
+import { Cell, ClientCommandType, GameState, Map, Player } from 'diggy-shared';
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
 import { UI } from '../ui/ui';
@@ -18,7 +12,6 @@ export class ClientInput {
   map: Map;
 
   constructor(
-    private engine: Engine,
     private ws: Ws,
     private ui: UI,
     private state: ClientState,
@@ -53,7 +46,7 @@ export class ClientInput {
     if (!cell) {
       return;
     }
-    const player = this.engine.getPlayer(this.login);
+    const player = this.getPlayer(this.login);
     if (player.lookX !== cell.x || player.lookY !== cell.y) {
       this.ws.send({
         type: ClientCommandType.LOOK,
@@ -70,7 +63,7 @@ export class ClientInput {
   }
 
   onCellClickStop(): void {
-    this.engine.getPlayer(this.login).attacking = false;
+    this.getPlayer(this.login).attacking = false;
   }
 
   onKey(e: KeyboardEvent, isKeyDown: boolean): void {
@@ -90,7 +83,7 @@ export class ClientInput {
   }
 
   moveLeft(start: boolean): void {
-    if (this.engine.getPlayer(this.login).movingLeft && start) {
+    if (this.getPlayer(this.login).movingLeft && start) {
       return;
     }
     this.ws.send({
@@ -100,7 +93,7 @@ export class ClientInput {
   }
 
   moveRight(start: boolean): void {
-    if (this.engine.getPlayer(this.login).movingRight && start) {
+    if (this.getPlayer(this.login).movingRight && start) {
       return;
     }
     this.ws.send({
@@ -110,12 +103,16 @@ export class ClientInput {
   }
 
   jump(start: boolean): void {
-    if (this.engine.getPlayer(this.login).airborne && start) {
+    if (this.getPlayer(this.login).airborne && start) {
       return;
     }
     this.ws.send({
       type: ClientCommandType.JUMP,
       payload: start ? '1' : '0'
     });
+  }
+
+  private getPlayer(name: string): Player {
+    return this.players.find((p) => p.name === name);
   }
 }

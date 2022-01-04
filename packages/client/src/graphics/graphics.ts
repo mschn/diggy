@@ -2,7 +2,6 @@ import { Dict } from '@pixi/utils';
 import {
   Cell,
   CELL_SIZE,
-  Engine,
   GameState,
   Map,
   PICKAXE_RANGE,
@@ -38,11 +37,7 @@ export class Graphics {
   private canvas: HTMLCanvasElement;
   private wrapper: HTMLDivElement;
 
-  constructor(
-    private engine: Engine,
-    private clientState: ClientState,
-    private gameState: GameState
-  ) {}
+  constructor(private clientState: ClientState, private gameState: GameState) {}
 
   start(): void {
     this.canvas = document.querySelector('#main canvas') as HTMLCanvasElement;
@@ -193,8 +188,8 @@ export class Graphics {
   }
 
   mouseOverCell(cell: Cell, sprite: Sprite): void {
-    const player = this.engine.getPlayer(this.login);
-    const color = this.engine.isInRange(cell, player, PICKAXE_RANGE)
+    const player = this.players.find((p) => p.name === this.login);
+    const color = player.isCellInRange(cell, PICKAXE_RANGE)
       ? '#ffffff'
       : '#ff0000';
 

@@ -65,11 +65,11 @@ export class Engine {
           console.log(`${player.name} mine ${player.lookX} ${player.lookY}`);
           player.lastAttack = now;
           const lookCell = this.map.cells[player.lookY]?.[player.lookX];
-          if (this.isInRange(lookCell, player, PICKAXE_RANGE)) {
+          if (player.isCellInRange(lookCell, PICKAXE_RANGE)) {
             const cell = this.map.mine(player.lookX, player.lookY);
             this.state.setCell(cell);
           } else {
-            console.log('not in range')
+            console.log('not in range');
           }
         }
       }
@@ -134,14 +134,5 @@ export class Engine {
       (tx) => this.map.getCell(tx, y + PLAYER_HEIGHT / 2)
     );
     return cells.find((c) => c.type.isWall);
-  }
-
-  isInRange(cell: Cell, player: Player, range: number): boolean {
-    if (!cell) {
-      return false;
-    }
-    const dx = Math.abs(player.x - (cell.x + 0.5) * CELL_SIZE);
-    const dy = Math.abs(player.y - cell.y * CELL_SIZE);
-    return dx <= CELL_SIZE * range && dy <= CELL_SIZE * range;
   }
 }

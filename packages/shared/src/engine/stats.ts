@@ -8,11 +8,11 @@ export class NetworkStat {
   ) {}
 
   public formatIn(): string {
-    return `In: ${this.formatBytes(this.bytesIn)}/s`;
+    return `${this.formatBytes(this.bytesIn)}/s`;
   }
 
   public formatOut(): string {
-    return `Out: ${this.formatBytes(this.bytesOut)}/s`;
+    return `${this.formatBytes(this.bytesOut)}/s`;
   }
 
   public formatBytes(bytes: number, decimals = 2): string {
