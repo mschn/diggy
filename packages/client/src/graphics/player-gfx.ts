@@ -71,7 +71,8 @@ export class PlayerGfx {
 
     // ATTACK
     if (now - this.player.lastAttack < this.player.attackSpeed) {
-      const spriteNum = (Math.floor(now / 200) % 2) + 1;
+      const midFrame = this.player.lastAttack + this.player.attackSpeed / 2;
+      const spriteNum = now > midFrame ? 2 : 1;
       this.rarm.texture =
         this.app.loader.resources[`p_rarm_${spriteNum}`].texture;
     } else {

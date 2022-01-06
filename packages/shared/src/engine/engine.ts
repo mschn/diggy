@@ -13,6 +13,8 @@ import { Player } from './player';
 
 @singleton()
 export class Engine {
+  isServer = false;
+
   private map: Map;
   private players: Player[] = [];
   private lastUpdateTime = Date.now();
@@ -56,20 +58,22 @@ export class Engine {
       let x = player.x;
       let y = player.y;
 
-      // attack
-      if (player.attacking) {
-        const now = new Date().getTime();
-        if (player.canAttackAt(now)) {
-          console.log(`${player.name} attack ${player.lookX} ${player.lookY}`);
-          player.lastAttack = now;
-          player.attacking = false;
-          const lookCell = this.map.cells[player.lookY]?.[player.lookX];
-          if (player.isCellInRange(lookCell, PICKAXE_RANGE)) {
-            const cell = this.map.mine(player.lookX, player.lookY);
-            this.state.setCell(cell);
-          } else {
-            console.log('not in range');
-          }
+      // attack: start animation
+      if (player.attacking && player.canAttackAt(now)) {
+        player.lastAttack = now;
+        player.attacking = false;
+        player.attackPending = true;
+      }
+
+      // attack: perform hit mid-animation
+      if (player.attackPending && player.canPerformAttack(now)) {
+        player.attackPending = false;
+        const lookCell = this.map.cells[player.lookY]?.[player.lookX];
+
+        // only perform map alteration on server side, then notify clients
+        if (player.isCellInRange(lookCell, PICKAXE_RANGE) && this.isServer) {
+          const cell = this.map.mine(player.lookX, player.lookY);
+          this.state.setCell(cell);
         }
       }
 

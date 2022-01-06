@@ -15,9 +15,16 @@ export class Player {
   orientation: PlayerOrientation = PlayerOrientation.RIGHT;
   airborne = false;
   jumpTime = 0;
+
+  // true to mark that the next engine tick will start an attack
   attacking = false;
+  // true when attack has been triggerred and needs to be applied mid animation
+  attackPending = false;
+  // time of last attack
   lastAttack = 0;
+  // minimum time in ms between 2 attacks
   attackSpeed = 500;
+
   lookX = 0;
   lookY = 0;
 
@@ -51,6 +58,10 @@ export class Player {
     return date - this.lastAttack > this.attackSpeed;
   }
 
+  canPerformAttack(date: number): boolean {
+    return date > this.lastAttack + this.attackSpeed / 2;
+  }
+
   isCellInRange(cell: Cell, range: number): boolean {
     if (!cell) {
       return false;
@@ -72,7 +83,9 @@ export class Player {
       this.airborne ? 1 : 0,
       this.jumpTime,
       this.attacking ? 1 : 0,
+      this.attackPending ? 1 : 0,
       this.lastAttack,
+      this.attackSpeed,
       this.lookX,
       this.lookY
     ].join(',');
@@ -91,9 +104,11 @@ export class Player {
     ret.airborne = s[7] === '1';
     ret.jumpTime = Number.parseInt(s[8], 10);
     ret.attacking = s[9] === '1';
-    ret.lastAttack = Number.parseInt(s[10]);
-    ret.lookX = Number.parseInt(s[11]);
-    ret.lookY = Number.parseInt(s[12]);
+    ret.attackPending = s[10] === '1';
+    ret.lastAttack = Number.parseInt(s[11]);
+    ret.attackSpeed = Number.parseInt(s[12]);
+    ret.lookX = Number.parseInt(s[13]);
+    ret.lookY = Number.parseInt(s[14]);
     return ret;
   }
 }

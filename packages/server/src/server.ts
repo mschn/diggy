@@ -53,6 +53,7 @@ export class DiggyServer {
 
     this.state.onTick().subscribe(() => this.update());
     this.state.loadMap(STATIC_MAP);
+    this.engine.isServer = true;
     this.engine.start();
 
     this.wss = new Server({ port: 8080, path: '/game' });
@@ -78,9 +79,9 @@ export class DiggyServer {
         }
         if (this.LOG_COMMANDS) {
           console.log(
-            `[RECEIVED] ${name} | ${ClientCommandType[cmd.type]} (${cmd.type}) : ${
-              cmd.payload
-            }`
+            `[RECEIVED] ${name} | ${ClientCommandType[cmd.type]} (${
+              cmd.type
+            }) : ${cmd.payload}`
           );
         }
         this.updateClients = true;
@@ -107,7 +108,9 @@ export class DiggyServer {
 
         // ATTACK
         if (cmd.type === ClientCommandType.ATTACK) {
-          player.attacking = true;
+          if (player.canAttackNow()) {
+            player.attacking = true;
+          }
           const coords = cmd.payload.split(',');
           const x = Number.parseInt(coords[0]);
           const y = Number.parseInt(coords[1]);

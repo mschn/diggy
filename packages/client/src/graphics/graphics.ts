@@ -164,7 +164,7 @@ export class Graphics {
   adjustPlayerCount(): void {
     this.players.find((pe) => {
       if (!this.playersGfx.find((pg) => pg.player.name === pe.name)) {
-        console.log(`adding new player ${pe.name}`);
+        console.log(`[JOIN ] Player ${pe.name} joined`);
         const newPlayerGfx = new PlayerGfx(this.app, pe);
         this.playersGfx.push(newPlayerGfx);
       }
@@ -172,7 +172,7 @@ export class Graphics {
 
     this.playersGfx = this.playersGfx.filter((pg) => {
       if (!this.players.find((pe) => pg.player.name === pe.name)) {
-        console.log(`removing player ${pg.player.name}`);
+        console.log(`[LEAVE] Player ${pg.player.name} left`);
         pg.cleanup();
         return false;
       }

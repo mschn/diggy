@@ -60,6 +60,8 @@ export class Map {
       c.hp = 0;
       this.cells[y][x] = c;
     }
+
+    console.log(`[MINED] ${this.cells[y][x].toString()}`);
     return this.cells[y][x];
   }
 

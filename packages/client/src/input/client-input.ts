@@ -64,7 +64,6 @@ export class ClientInput {
     if (pcell && cell) {
       const newOrientation =
         cell.x < pcell.x ? PlayerOrientation.LEFT : PlayerOrientation.RIGHT;
-      console.log('orientation', player.x, pcell.x);
       if (player.orientation !== newOrientation) {
         player.orientation = newOrientation;
         this.ws.send({
@@ -131,6 +130,7 @@ export class ClientInput {
   private doAttack(): void {
     const player = this.getPlayer();
     if (this.mousedown && player.canAttackNow()) {
+      player.lastAttack = Date.now();
       player.attacking = true;
       this.ws.send({
         type: ClientCommandType.ATTACK,
