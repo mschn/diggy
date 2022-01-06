@@ -51,6 +51,8 @@ export class PlayerGfx {
   }
 
   update(): void {
+    const now = new Date().getTime();
+
     if (this.player.jumpTime > 0) {
       // JUMP
       this.legs.texture = this.app.loader.resources.p_leg_1.texture;
@@ -59,7 +61,7 @@ export class PlayerGfx {
       this.legs.texture = this.app.loader.resources.p_leg.texture;
     } else if (this.player.movingLeft || this.player.movingRight) {
       // RUN
-      const spriteNum = (Math.floor(new Date().getTime() / 200) % 2) + 1;
+      const spriteNum = (Math.floor(now / 200) % 2) + 1;
       this.legs.texture =
         this.app.loader.resources[`p_leg_${spriteNum}`].texture;
     } else {
@@ -68,8 +70,8 @@ export class PlayerGfx {
     }
 
     // ATTACK
-    if (this.player.attacking) {
-      const spriteNum = (Math.floor(new Date().getTime() / 200) % 2) + 1;
+    if (now - this.player.lastAttack < this.player.attackSpeed) {
+      const spriteNum = (Math.floor(now / 200) % 2) + 1;
       this.rarm.texture =
         this.app.loader.resources[`p_rarm_${spriteNum}`].texture;
     } else {

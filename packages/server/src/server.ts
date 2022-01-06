@@ -77,7 +77,11 @@ export class DiggyServer {
           this.stats.recordIn(message.toString().length);
         }
         if (this.LOG_COMMANDS) {
-          console.log(`Received command ${cmd.type} : ${cmd.payload}`);
+          console.log(
+            `[RECEIVED] ${name} | ${ClientCommandType[cmd.type]} (${cmd.type}) : ${
+              cmd.payload
+            }`
+          );
         }
         this.updateClients = true;
 
@@ -95,6 +99,15 @@ export class DiggyServer {
         }
         // LOOK
         if (cmd.type === ClientCommandType.LOOK) {
+          player.orientation =
+            cmd.payload === '1'
+              ? PlayerOrientation.RIGHT
+              : PlayerOrientation.LEFT;
+        }
+
+        // ATTACK
+        if (cmd.type === ClientCommandType.ATTACK) {
+          player.attacking = true;
           const coords = cmd.payload.split(',');
           const x = Number.parseInt(coords[0]);
           const y = Number.parseInt(coords[1]);
@@ -103,11 +116,6 @@ export class DiggyServer {
           const pcell = this.map.getCell(player.x, player.y);
           player.orientation =
             x < pcell.x ? PlayerOrientation.LEFT : PlayerOrientation.RIGHT;
-        }
-
-        // ATTACK
-        if (cmd.type === ClientCommandType.ATTACK) {
-          player.attacking = cmd.payload === '1';
         }
       });
 

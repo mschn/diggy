@@ -73,9 +73,7 @@ export class Cell {
   hp: number;
 
   toString(): string {
-    const ret = [this.type.code, this.x, this.y, this.hp].join(',');
-    console.log(ret);
-    return ret;
+    return [this.type.code, this.x, this.y, this.hp].join(',');
   }
 
   static fromString(str: string): Cell {

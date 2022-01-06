@@ -1,4 +1,11 @@
-import { Cell, ClientCommandType, GameState, Map, Player } from 'diggy-shared';
+import {
+  Cell,
+  ClientCommandType,
+  GameState,
+  Map,
+  Player,
+  PlayerOrientation
+} from 'diggy-shared';
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
 import { UI } from '../ui/ui';
@@ -11,6 +18,9 @@ export class ClientInput {
   players: Player[];
   map: Map;
 
+  mousedown = false;
+  hoveredCell: Cell;
+
   constructor(
     private ws: Ws,
     private ui: UI,
@@ -19,6 +29,7 @@ export class ClientInput {
   ) {
     this.game.getPlayers().subscribe((players) => (this.players = players));
     this.game.getMap().subscribe((map) => (this.map = map));
+    this.game.onTick().subscribe(() => this.doAttack());
 
     this.state.onCellHovered().subscribe((cell) => this.onCellHovered(cell));
     this.state
@@ -43,27 +54,32 @@ export class ClientInput {
   }
 
   onCellHovered(cell: Cell): void {
-    if (!cell) {
-      return;
-    }
-    const player = this.getPlayer(this.login);
-    if (player.lookX !== cell.x || player.lookY !== cell.y) {
-      this.ws.send({
-        type: ClientCommandType.LOOK,
-        payload: `${cell.x},${cell.y}`
-      });
+    // hovered cell is used every tick to check if we need to attack
+    this.hoveredCell = cell;
+
+    // send left / right orientation to server
+    // dont send full look coordinates all the time to prevent waste
+    const player = this.getPlayer();
+    const pcell = this.map.getCell(player.x, player.y);
+    if (pcell && cell) {
+      const newOrientation =
+        cell.x < pcell.x ? PlayerOrientation.LEFT : PlayerOrientation.RIGHT;
+      console.log('orientation', player.x, pcell.x);
+      if (player.orientation !== newOrientation) {
+        player.orientation = newOrientation;
+        this.ws.send({
+          type: ClientCommandType.LOOK,
+          payload: newOrientation === PlayerOrientation.RIGHT ? '1' : '0'
+        });
+      }
     }
   }
 
   onMouseDown(mouseDown: boolean): void {
-    this.ws.send({
-      type: ClientCommandType.ATTACK,
-      payload: mouseDown ? '1' : '0'
-    });
-  }
-
-  onCellClickStop(): void {
-    this.getPlayer(this.login).attacking = false;
+    this.mousedown = mouseDown;
+    if (mouseDown) {
+      this.doAttack();
+    }
   }
 
   onKey(e: KeyboardEvent, isKeyDown: boolean): void {
@@ -83,7 +99,7 @@ export class ClientInput {
   }
 
   moveLeft(start: boolean): void {
-    if (this.getPlayer(this.login).movingLeft && start) {
+    if (this.getPlayer().movingLeft && start) {
       return;
     }
     this.ws.send({
@@ -93,7 +109,7 @@ export class ClientInput {
   }
 
   moveRight(start: boolean): void {
-    if (this.getPlayer(this.login).movingRight && start) {
+    if (this.getPlayer().movingRight && start) {
       return;
     }
     this.ws.send({
@@ -103,7 +119,7 @@ export class ClientInput {
   }
 
   jump(start: boolean): void {
-    if (this.getPlayer(this.login).airborne && start) {
+    if (this.getPlayer().airborne && start) {
       return;
     }
     this.ws.send({
@@ -112,7 +128,18 @@ export class ClientInput {
     });
   }
 
-  private getPlayer(name: string): Player {
-    return this.players.find((p) => p.name === name);
+  private doAttack(): void {
+    const player = this.getPlayer();
+    if (this.mousedown && player.canAttackNow()) {
+      player.attacking = true;
+      this.ws.send({
+        type: ClientCommandType.ATTACK,
+        payload: `${this.hoveredCell?.x},${this.hoveredCell?.y}`
+      });
+    }
+  }
+
+  private getPlayer(): Player {
+    return this.players.find((p) => p.name === this.login);
   }
 }

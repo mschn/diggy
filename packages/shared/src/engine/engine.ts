@@ -59,11 +59,10 @@ export class Engine {
       // attack
       if (player.attacking) {
         const now = new Date().getTime();
-
-        // 1 attack per second
-        if (now - player.lastAttack > 1000) {
-          console.log(`${player.name} mine ${player.lookX} ${player.lookY}`);
+        if (player.canAttackAt(now)) {
+          console.log(`${player.name} attack ${player.lookX} ${player.lookY}`);
           player.lastAttack = now;
+          player.attacking = false;
           const lookCell = this.map.cells[player.lookY]?.[player.lookX];
           if (player.isCellInRange(lookCell, PICKAXE_RANGE)) {
             const cell = this.map.mine(player.lookX, player.lookY);

@@ -17,6 +17,7 @@ export class Player {
   jumpTime = 0;
   attacking = false;
   lastAttack = 0;
+  attackSpeed = 500;
   lookX = 0;
   lookY = 0;
 
@@ -36,6 +37,18 @@ export class Player {
     }
     this.airborne = true;
     this.jumpTime = 300;
+  }
+
+  attack(): void {
+    return;
+  }
+
+  canAttackNow(): boolean {
+    return this.canAttackAt(new Date().getTime());
+  }
+
+  canAttackAt(date: number): boolean {
+    return date - this.lastAttack > this.attackSpeed;
   }
 
   isCellInRange(cell: Cell, range: number): boolean {
