@@ -32,7 +32,7 @@ export class MapInfo extends React.Component<IProp, IState> {
   render(): JSX.Element {
     return (
       <Wrapper>
-        <h3>Info</h3>
+        <h3 className="mt-0">Info</h3>
         {this.state?.cell && (
           <div>
             <div>{this.state.cell.type.name}</div>

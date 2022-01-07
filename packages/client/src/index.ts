@@ -4,6 +4,8 @@ import { Client } from './client';
 
 // required by webpack to have the style in index.ejs
 import './style.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import { container } from 'tsyringe';
 
 document.body.onload = () => {
