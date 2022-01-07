@@ -15,7 +15,7 @@ export class UI {
 
     ReactDOM.render(
       <MapInfo clientState={this.clientState} />,
-      document.getElementById('ui-info-content')
+      document.getElementById('ui-info')
     );
     ReactDOM.render(
       <NetStatView stats={this.stats} />,
@@ -23,6 +23,7 @@ export class UI {
     );
   }
 
+  // TODO use this to toggle inventory instead
   toggle(): void {
     this.uiDom.classList.toggle('d-none');
   }
