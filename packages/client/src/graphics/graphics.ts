@@ -167,7 +167,7 @@ export class Graphics {
   adjustPlayerCount(): void {
     this.players.find((pe) => {
       if (!this.playersGfx.find((pg) => pg.player.name === pe.name)) {
-        console.log(`[JOIN ] Player ${pe.name} joined`);
+        console.log(`[JOIN] Player ${pe.name} joined`);
         const newPlayerGfx = new PlayerGfx(this.app, pe);
         this.playersGfx.push(newPlayerGfx);
       }
@@ -207,7 +207,6 @@ export class Graphics {
     this.mouseOverOutline.endFill();
     this.mapContainer.addChild(this.mouseOverOutline);
 
-    console.log(`[HOVER] ${cell.toString()}`);
     this.clientState.hoverCell(cell);
   }
 }

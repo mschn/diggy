@@ -30,7 +30,6 @@ export class GameState {
   setCell(cell: Cell): void {
     const map = this.map.getValue();
     map.cells[cell.y][cell.x] = cell;
-    console.log(`[SET CELL] ${cell.toString()}`);
     this._cell.next(cell);
   }
   onCell(): Observable<Cell> {

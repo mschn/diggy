@@ -107,8 +107,9 @@ export class Engine {
         y -= player.speed * jumpTime;
         player.jumpTime -= jumpTime;
 
-        const ceiling = this.map.getCell(x, y - PLAYER_HEIGHT / 2);
-        if (ceiling.type.isWall) {
+        const ceiling = this.getCeiling(x, y);
+        if (ceiling) {
+          player.jumpTime = 0;
           y = ceiling.y * CELL_SIZE + 1 * PLAYER_HEIGHT;
         }
       }
@@ -130,6 +131,13 @@ export class Engine {
     });
 
     this.state.tick();
+  }
+
+  getCeiling(x: number, y: number): Cell {
+    const cells = [x - PLAYER_WIDTH / 2, x, x - 1 + PLAYER_WIDTH / 2].map(
+      (tx) => this.map.getCell(tx, y - PLAYER_HEIGHT / 2)
+    );
+    return cells.find((c) => c.type.isWall);
   }
 
   getGroundBelow(x: number, y: number): Cell {
