@@ -71,9 +71,12 @@ export class Cell {
   x: number;
   y: number;
   hp: number;
+  maxHp: number;
 
   toString(): string {
-    return [this.type.code, this.x, this.y, this.hp].join(',');
+    return [this.type.code, this.x, this.y, `${this.hp}/${this.maxHp}`].join(
+      ','
+    );
   }
 
   static fromString(str: string): Cell {
@@ -82,7 +85,10 @@ export class Cell {
     ret.type = getCellType(c[0]);
     ret.x = Number.parseInt(c[1], 10);
     ret.y = Number.parseInt(c[2], 10);
-    ret.hp = Number.parseInt(c[3], 10);
+
+    const hp = c[3].split('/');
+    ret.hp = Number.parseInt(hp[0], 10);
+    ret.maxHp = Number.parseInt(hp[1], 10);
     return ret;
   }
 }

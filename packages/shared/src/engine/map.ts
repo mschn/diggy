@@ -22,6 +22,7 @@ export class Map {
         cell.x = j;
         cell.y = i;
         cell.hp = cell.type.hp;
+        cell.maxHp = cell.hp;
         return cell;
       })
     );

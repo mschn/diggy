@@ -1,4 +1,4 @@
-import { NetworkStat, Stats } from 'diggy-shared';
+import { GameState, NetworkStat, Stats } from 'diggy-shared';
 import * as ReactDOM from 'react-dom';
 import { singleton } from 'tsyringe';
 import { ClientState } from '../client-state';
@@ -10,11 +10,15 @@ export class UI {
 
   netStats: NetworkStat;
 
-  constructor(private clientState: ClientState, private stats: Stats) {
+  constructor(
+    private clientState: ClientState,
+    private gameState: GameState,
+    private stats: Stats
+  ) {
     this.uiDom = document.querySelector('#ui');
 
     ReactDOM.render(
-      <MapInfo clientState={this.clientState} />,
+      <MapInfo clientState={this.clientState} gameState={this.gameState} />,
       document.getElementById('ui-info')
     );
     ReactDOM.render(

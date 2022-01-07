@@ -139,6 +139,9 @@ export class Graphics {
 
   updateCell(cell: Cell): void {
     const sprite = this.cells[cell.y][cell.x];
+    sprite.off('pointerover');
+    sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
+    // sprite.on('pointerout', () => this.mouseOutCell());
     sprite.texture = this.app.loader.resources[cell.type.sprite].texture;
   }
 
@@ -204,6 +207,7 @@ export class Graphics {
     this.mouseOverOutline.endFill();
     this.mapContainer.addChild(this.mouseOverOutline);
 
+    console.log(`[HOVER] ${cell.toString()}`);
     this.clientState.hoverCell(cell);
   }
 }
