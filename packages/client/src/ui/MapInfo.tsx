@@ -26,10 +26,10 @@ const Wrapper = styled.div`
 export class MapInfo extends React.Component<IProp, IState> {
   componentDidMount(): void {
     this.props.clientState
-      .onCellHovered()
+      .onCellSelected()
       .subscribe((cell) => this.setState({ cell }));
     this.props.gameState.onCell().subscribe((cell) => {
-      if (cell.x === this.state.cell.x && cell.y === this.state.cell.y) {
+      if (cell.x === this.state?.cell?.x && cell.y === this.state?.cell?.y) {
         this.setState({ cell });
       }
     });

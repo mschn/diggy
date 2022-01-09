@@ -18,7 +18,7 @@ import {
   utils
 } from 'pixi.js';
 import { singleton } from 'tsyringe';
-import { ClientState } from '../client-state';
+import { ClientState, MouseButton } from '../client-state';
 import { PlayerGfx } from './player-gfx';
 
 @singleton()
@@ -33,6 +33,7 @@ export class Graphics {
   private mapContainer: Container;
   private cells: Sprite[][] = [];
   private mouseOverOutline: PixiGraphics;
+  private selectedCellOutline: PixiGraphics;
 
   private canvas: HTMLCanvasElement;
   private wrapper: HTMLDivElement;
@@ -43,14 +44,27 @@ export class Graphics {
     this.canvas = document.querySelector('#main canvas') as HTMLCanvasElement;
     this.wrapper = document.querySelector('#canvas-wrapper') as HTMLDivElement;
     window.addEventListener('resize', () => this.resizeCanvas());
-    this.canvas.addEventListener('pointerdown', () =>
-      this.clientState.mouseDown(true)
-    );
-    this.canvas.addEventListener('pointerup', () =>
-      this.clientState.mouseDown(false)
-    );
+
+    // disable right click menu in game area: replaced with cell info selection
+    this.canvas.oncontextmenu = () => false;
+
+    this.canvas.addEventListener('pointerdown', (event) => {
+      this.clientState.mouseEvent({
+        state: true,
+        button: this.buildMouseButton(event.buttons)
+      });
+    });
+    this.canvas.addEventListener('pointerup', (event) => {
+      this.clientState.mouseEvent({
+        state: false,
+        button: this.buildMouseButton(event.buttons)
+      });
+    });
 
     this.clientState.onLoggedIn().subscribe((login) => (this.login = login));
+    this.clientState
+      .onCellSelected()
+      .subscribe((cell) => this.selectCell(cell));
 
     this.gameState
       .getPlayers()
@@ -167,7 +181,6 @@ export class Graphics {
   adjustPlayerCount(): void {
     this.players.find((pe) => {
       if (!this.playersGfx.find((pg) => pg.player.name === pe.name)) {
-        console.log(`[JOIN] Player ${pe.name} joined`);
         const newPlayerGfx = new PlayerGfx(this.app, pe);
         this.playersGfx.push(newPlayerGfx);
       }
@@ -175,7 +188,6 @@ export class Graphics {
 
     this.playersGfx = this.playersGfx.filter((pg) => {
       if (!this.players.find((pe) => pg.player.name === pe.name)) {
-        console.log(`[LEAVE] Player ${pg.player.name} left`);
         pg.cleanup();
         return false;
       }
@@ -206,7 +218,32 @@ export class Graphics {
     );
     this.mouseOverOutline.endFill();
     this.mapContainer.addChild(this.mouseOverOutline);
-
     this.clientState.hoverCell(cell);
+  }
+
+  selectCell(cell: Cell): void {
+    if (this.selectedCellOutline) {
+      this.mapContainer.removeChild(this.selectedCellOutline);
+    }
+    const sprite = this.cells[cell.y][cell.x];
+    this.selectedCellOutline = new PixiGraphics();
+    this.selectedCellOutline.lineStyle(1, utils.string2hex('#ffffff'), 1);
+    this.selectedCellOutline.drawRect(
+      sprite.x,
+      sprite.y,
+      sprite.width,
+      sprite.height
+    );
+    this.selectedCellOutline.endFill();
+    this.mapContainer.addChild(this.selectedCellOutline);
+  }
+
+  private buildMouseButton(buttons: number): MouseButton {
+    if (buttons === 1) {
+      return MouseButton.LEFT;
+    } else if (buttons === 2) {
+      return MouseButton.RIGHT;
+    }
+    return MouseButton.OTHER;
   }
 }

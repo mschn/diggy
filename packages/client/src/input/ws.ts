@@ -26,9 +26,9 @@ export class Ws {
     this.wss.onmessage = (event) => {
       const cmd = JSON.parse(event.data) as Command;
 
-      console.log(
-        `[WS] ${ServerCommandType[cmd.type]} (${cmd.type}) : ${cmd.payload}`
-      );
+      // console.log(
+      //   `[WS] ${ServerCommandType[cmd.type]} (${cmd.type}) : ${cmd.payload}`
+      // );
       this.stats.recordIn(event.data.length);
 
       if (cmd.type === ServerCommandType.MAP) {

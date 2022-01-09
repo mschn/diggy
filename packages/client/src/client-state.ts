@@ -2,14 +2,24 @@ import { Cell } from 'diggy-shared';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { singleton } from 'tsyringe';
 
+export enum MouseButton {
+  LEFT,
+  RIGHT,
+  OTHER
+}
+
+export interface MouseEvt {
+  state: boolean;
+  button: MouseButton;
+}
+
 @singleton()
 export class ClientState {
   private _loggedIn = new BehaviorSubject<string>(undefined);
-  // TODO change name to be more 'cellFromServer'
-  private _cell = new Subject<Cell>();
 
-  private _mouseDown = new Subject<boolean>();
+  private _mouseEvent = new Subject<MouseEvt>();
   private _cellHovered = new Subject<Cell>();
+  private _cellSelected = new Subject<Cell>();
 
   loggedIn(login: string): void {
     this._loggedIn.next(login);
@@ -18,11 +28,11 @@ export class ClientState {
     return this._loggedIn.asObservable();
   }
 
-  mouseDown(state: boolean): void {
-    this._mouseDown.next(state);
+  mouseEvent(event: MouseEvt): void {
+    this._mouseEvent.next(event);
   }
-  onMouseDown(): Observable<boolean> {
-    return this._mouseDown.asObservable();
+  onMouseEvent(): Observable<MouseEvt> {
+    return this._mouseEvent.asObservable();
   }
 
   hoverCell(cell: Cell): void {
@@ -30,5 +40,12 @@ export class ClientState {
   }
   onCellHovered(): Observable<Cell> {
     return this._cellHovered.asObservable();
+  }
+
+  selectCell(cell: Cell): void {
+    this._cellSelected.next(cell);
+  }
+  onCellSelected(): Observable<Cell> {
+    return this._cellSelected.asObservable();
   }
 }

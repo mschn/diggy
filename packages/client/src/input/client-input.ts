@@ -7,7 +7,7 @@ import {
   PlayerOrientation
 } from 'diggy-shared';
 import { singleton } from 'tsyringe';
-import { ClientState } from '../client-state';
+import { ClientState, MouseButton, MouseEvt } from '../client-state';
 import { UI } from '../ui/ui';
 import { Ws } from './ws';
 
@@ -18,7 +18,7 @@ export class ClientInput {
   players: Player[];
   map: Map;
 
-  mousedown = false;
+  leftClickDown = false;
   hoveredCell: Cell;
 
   constructor(
@@ -33,8 +33,8 @@ export class ClientInput {
 
     this.state.onCellHovered().subscribe((cell) => this.onCellHovered(cell));
     this.state
-      .onMouseDown()
-      .subscribe((mouseDown) => this.onMouseDown(mouseDown));
+      .onMouseEvent()
+      .subscribe((mouseEvent) => this.onMouseEvent(mouseEvent));
 
     this.state.onLoggedIn().subscribe((login) => (this.login = login));
   }
@@ -74,10 +74,19 @@ export class ClientInput {
     }
   }
 
-  onMouseDown(mouseDown: boolean): void {
-    this.mousedown = mouseDown;
-    if (mouseDown) {
-      this.doAttack();
+  onMouseEvent(mouseEvt: MouseEvt): void {
+    if (this.leftClickDown) {
+      // when pointerup is fired you dont know for which button,
+      // and there cant be 2 button clicks at the same time
+      this.leftClickDown = false;
+    }
+    if (mouseEvt.button === MouseButton.LEFT) {
+      this.leftClickDown = mouseEvt.state;
+      if (this.leftClickDown) {
+        this.doAttack();
+      }
+    } else if (mouseEvt.button === MouseButton.RIGHT && mouseEvt.state) {
+      this.state.selectCell(this.hoveredCell);
     }
   }
 
@@ -129,7 +138,7 @@ export class ClientInput {
 
   private doAttack(): void {
     const player = this.getPlayer();
-    if (this.mousedown && player.canAttackNow()) {
+    if (this.leftClickDown && player.canAttackNow()) {
       player.lastAttack = Date.now();
       player.attacking = true;
       this.ws.send({
