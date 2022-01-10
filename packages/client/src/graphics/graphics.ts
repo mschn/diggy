@@ -18,7 +18,7 @@ import {
   utils
 } from 'pixi.js';
 import { singleton } from 'tsyringe';
-import { ClientState, MouseButton } from '../client-state';
+import { ClientState } from '../client-state';
 import { PlayerGfx } from './player-gfx';
 
 @singleton()
@@ -34,6 +34,8 @@ export class Graphics {
   private cells: Sprite[][] = [];
   private mouseOverOutline: PixiGraphics;
   private selectedCellOutline: PixiGraphics;
+  private leftClickDown = false;
+  private hoveredCell: Cell;
 
   private canvas: HTMLCanvasElement;
   private wrapper: HTMLDivElement;
@@ -49,16 +51,20 @@ export class Graphics {
     this.canvas.oncontextmenu = () => false;
 
     this.canvas.addEventListener('pointerdown', (event) => {
-      this.clientState.mouseEvent({
-        state: true,
-        button: this.buildMouseButton(event.buttons)
-      });
+      // left click
+      if (event.buttons === 1) {
+        this.leftClickDown = true;
+        this.clientState.attack(true);
+      } else if (event.buttons === 2) {
+        this.clientState.selectCell(this.hoveredCell);
+      }
     });
-    this.canvas.addEventListener('pointerup', (event) => {
-      this.clientState.mouseEvent({
-        state: false,
-        button: this.buildMouseButton(event.buttons)
-      });
+    this.canvas.addEventListener('pointerup', () => {
+      // left click up
+      if (this.leftClickDown) {
+        this.leftClickDown = false;
+        this.clientState.attack(false);
+      }
     });
 
     this.clientState.onLoggedIn().subscribe((login) => (this.login = login));
@@ -218,6 +224,7 @@ export class Graphics {
     );
     this.mouseOverOutline.endFill();
     this.mapContainer.addChild(this.mouseOverOutline);
+    this.hoveredCell = cell;
     this.clientState.hoverCell(cell);
   }
 
@@ -236,14 +243,5 @@ export class Graphics {
     );
     this.selectedCellOutline.endFill();
     this.mapContainer.addChild(this.selectedCellOutline);
-  }
-
-  private buildMouseButton(buttons: number): MouseButton {
-    if (buttons === 1) {
-      return MouseButton.LEFT;
-    } else if (buttons === 2) {
-      return MouseButton.RIGHT;
-    }
-    return MouseButton.OTHER;
   }
 }
