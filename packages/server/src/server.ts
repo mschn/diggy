@@ -18,14 +18,17 @@ import WebSocket = require('ws');
 
 @singleton()
 export class DiggyServer {
+  private readonly UPDATE_FREQ = 200;
+
   private wss: Server;
   private updateClients = false;
+  private lastClientUpdate: number;
 
   private map: Map;
   private players: Player[];
 
   private LOG_STATS = false;
-  private LOG_COMMANDS = false;
+  private LOG_COMMANDS = true;
 
   constructor(
     private readonly engine: Engine,
@@ -130,9 +133,11 @@ export class DiggyServer {
   }
 
   update(): void {
-    if (!this.updateClients) {
+    const now = Date.now();
+    if (!this.updateClients && now - this.lastClientUpdate < this.UPDATE_FREQ) {
       return;
     } else {
+      this.lastClientUpdate = now;
       this.updateClients = false;
     }
     const payload = this.players.map((p) => p.toString()).join('\n');

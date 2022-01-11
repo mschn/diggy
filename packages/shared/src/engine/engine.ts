@@ -78,11 +78,6 @@ export class Engine {
 
         const ceiling = this.getCeiling(x, y);
         if (ceiling) {
-          console.log(
-            'touch ceiling',
-            y,
-            ceiling.y * CELL_SIZE + 1 * PLAYER_HEIGHT
-          );
           player.jumpTime = 0;
           y = ceiling.y * CELL_SIZE + (3 * PLAYER_HEIGHT) / 4;
         }
@@ -116,8 +111,6 @@ export class Engine {
         );
         const wall = cells.find((c) => c.type.isWall);
         if (wall) {
-          const c = this.map.getCell(x, y);
-          console.log('left wall', c.x, c.y, x, y, wall.toString());
           x = (wall.x + 1) * CELL_SIZE + 0.5 * PLAYER_WIDTH;
         }
       }
@@ -138,7 +131,6 @@ export class Engine {
       player.y = Math.round(y);
 
       const c = this.map.getCell(player.x, player.y);
-      // console.log(`POS ${c.x} ${c.y}`);
     });
 
     this.state.tick();
