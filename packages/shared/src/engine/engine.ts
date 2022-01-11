@@ -58,6 +58,31 @@ export class Engine {
       let x = player.x;
       let y = player.y;
 
+      // Jumping
+      if (player.airborne && player.jumpTime > 0) {
+        const jumpTime = Math.min(dt, player.jumpTime);
+        y -= player.speed * jumpTime;
+        player.jumpTime -= jumpTime;
+
+        const ceiling = this.getCeiling(x, y);
+        if (ceiling) {
+          player.jumpTime = 0;
+          y = ceiling.y * CELL_SIZE + 1 * PLAYER_HEIGHT;
+        }
+      }
+
+      // Fall
+      if (player.jumpTime === 0) {
+        if (player.airborne) {
+          y += player.speed * dt;
+        }
+        const groundBelow = this.getGroundBelow(x, y);
+        player.airborne = !groundBelow;
+        if (groundBelow) {
+          y = groundBelow.y * CELL_SIZE - 0.5 * PLAYER_HEIGHT;
+        }
+      }
+
       // attack: start animation
       if (player.attacking && player.canAttackAt(now)) {
         player.lastAttack = now;
@@ -99,31 +124,6 @@ export class Engine {
         const wall = cells.find((c) => c.type.isWall);
         if (wall) {
           x = wall.x * CELL_SIZE - 0.5 * PLAYER_WIDTH;
-        }
-      }
-
-      // Jumping
-      if (player.airborne && player.jumpTime > 0) {
-        const jumpTime = Math.min(dt, player.jumpTime);
-        y -= player.speed * jumpTime;
-        player.jumpTime -= jumpTime;
-
-        const ceiling = this.getCeiling(x, y);
-        if (ceiling) {
-          player.jumpTime = 0;
-          y = ceiling.y * CELL_SIZE + 1 * PLAYER_HEIGHT;
-        }
-      }
-
-      // Fall
-      if (player.jumpTime === 0) {
-        if (player.airborne) {
-          y += player.speed * dt;
-        }
-        const groundBelow = this.getGroundBelow(x, y);
-        player.airborne = !groundBelow;
-        if (groundBelow) {
-          y = groundBelow.y * CELL_SIZE - 0.5 * PLAYER_HEIGHT;
         }
       }
 

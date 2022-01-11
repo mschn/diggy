@@ -237,10 +237,6 @@ export class Graphics {
     );
     this.mouseOverOutline.endFill();
     this.mapContainer.addChild(this.mouseOverOutline);
-
-
-
-    console.log(cell.toString());
   }
 
   selectCell(cell: Cell): void {

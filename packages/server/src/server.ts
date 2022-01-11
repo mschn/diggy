@@ -25,7 +25,7 @@ export class DiggyServer {
   private players: Player[];
 
   private LOG_STATS = false;
-  private LOG_COMMANDS = true;
+  private LOG_COMMANDS = false;
 
   constructor(
     private readonly engine: Engine,

@@ -4,8 +4,9 @@ export const CELL_SIZE = 16;
 
 export const PLAYER_HEIGHT = 48;
 export const PLAYER_WIDTH = 32;
-
+export const PLAYER_BASE_JUMP = 350;
 export const PLAYER_BASE_SPEED = 0.2;
+export const PLAYER_BASE_ATTACK_SPEED = 500;
 
 export const PICKAXE_RANGE = 3;
 
