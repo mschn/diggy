@@ -79,6 +79,10 @@ export class Cell {
     );
   }
 
+  coordsEquals(c: Cell): boolean {
+    return this?.x === c?.x && this?.y === c?.y;
+  }
+
   static fromString(str: string): Cell {
     const c = str.split(',');
     const ret = new Cell();

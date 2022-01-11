@@ -1,3 +1,4 @@
+import { Player } from '..';
 import { Cell, CellTypes, CELL_TYPES, getCellType } from './cell';
 import { CELL_SIZE } from './constants';
 
@@ -46,6 +47,10 @@ export class Map {
     return this.cells[cy][cx];
   }
 
+  mineCell(c: Cell): Cell {
+    return this.mine(c.x, c.y);
+  }
+
   mine(x: number, y: number): Cell {
     const cell = this.cells[y][x];
     if (!cell.type.isWall || cell.type.unbreakable) {
@@ -64,6 +69,37 @@ export class Map {
 
     console.log(`[MINED] ${this.cells[y][x].toString()}`);
     return this.cells[y][x];
+  }
+
+  // draw a line between a player and a target cell,
+  // return the first cell on the map that intersects with that line
+  findClosestCell(p: Player, c: Cell): Cell {
+    if (!p || !c) {
+      return null;
+    }
+
+    const playerCell = this.getCell(p.x, p.y);
+    const px = playerCell.x;
+    const py = playerCell.y + 1;
+    const cx = c.x;
+    const cy = c.y;
+    if (px === cx && py === cy) {
+      return c;
+    }
+    let ix = px;
+    let iy = py;
+    const dx = cx - px;
+    const dy = cy - py;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    while (Math.round(ix) !== cx || Math.round(iy) !== cy) {
+      ix += dx / len;
+      iy += dy / len;
+      const c = this.cells[Math.round(iy)][Math.round(ix)];
+      if (c.type.isWall) {
+        return c;
+      }
+    }
+    return this.cells[cy][cx];
   }
 
   toString(): string {

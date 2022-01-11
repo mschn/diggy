@@ -148,7 +148,7 @@ export class Graphics {
         sprite.width = CELL_SIZE;
         sprite.height = CELL_SIZE;
         sprite.interactive = true;
-        sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
+        sprite.on('pointerover', () => this.mouseOverCell(cell));
         sprite.on('pointerout', () => this.mouseOutCell());
         this.mapContainer.addChild(sprite);
         spriteRef.push(sprite);
@@ -160,9 +160,10 @@ export class Graphics {
   updateCell(cell: Cell): void {
     const sprite = this.cells[cell.y][cell.x];
     sprite.off('pointerover');
-    sprite.on('pointerover', () => this.mouseOverCell(cell, sprite));
-    // sprite.on('pointerout', () => this.mouseOutCell());
+    sprite.on('pointerover', () => this.mouseOverCell(cell));
     sprite.texture = this.app.loader.resources[cell.type.sprite].texture;
+    this.mouseOutCell();
+    this.mouseOverCell(this.hoveredCell);
   }
 
   updatePlayers(players: Player[]): void {
@@ -208,14 +209,26 @@ export class Graphics {
     }
   }
 
-  mouseOverCell(cell: Cell, sprite: Sprite): void {
+  mouseOverCell(cell: Cell): void {
+    if (!cell) {
+      return;
+    }
+
+    this.hoveredCell = cell;
+    this.clientState.hoverCell(cell);
+
     const player = this.players.find((p) => p.name === this.login);
-    const color = player.isCellInRange(cell, PICKAXE_RANGE)
-      ? '#ffffff'
-      : '#ff0000';
+    const targetedCell = this.map.findClosestCell(player, cell);
+    const sprite = this.cells[targetedCell.y][targetedCell.x];
+    if (
+      !player.isCellInRange(targetedCell, PICKAXE_RANGE) ||
+      !targetedCell.type.isWall
+    ) {
+      return;
+    }
 
     this.mouseOverOutline = new PixiGraphics();
-    this.mouseOverOutline.lineStyle(1, utils.string2hex(color), 1);
+    this.mouseOverOutline.lineStyle(1, utils.string2hex('#ffffff'), 1);
     this.mouseOverOutline.drawRect(
       sprite.x,
       sprite.y,
@@ -224,8 +237,10 @@ export class Graphics {
     );
     this.mouseOverOutline.endFill();
     this.mapContainer.addChild(this.mouseOverOutline);
-    this.hoveredCell = cell;
-    this.clientState.hoverCell(cell);
+
+
+
+    console.log(cell.toString());
   }
 
   selectCell(cell: Cell): void {

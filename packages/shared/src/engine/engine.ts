@@ -69,10 +69,11 @@ export class Engine {
       if (player.attackPending && player.canPerformAttack(now)) {
         player.attackPending = false;
         const lookCell = this.map.cells[player.lookY]?.[player.lookX];
+        const cellToMine = this.map.findClosestCell(player, lookCell);
 
         // only perform map alteration on server side, then notify clients
-        if (player.isCellInRange(lookCell, PICKAXE_RANGE) && this.isServer) {
-          const cell = this.map.mine(player.lookX, player.lookY);
+        if (player.isCellInRange(cellToMine, PICKAXE_RANGE) && this.isServer) {
+          const cell = this.map.mineCell(cellToMine);
           this.state.setCell(cell);
         }
       }
