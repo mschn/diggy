@@ -58,19 +58,6 @@ export class Engine {
       let x = player.x;
       let y = player.y;
 
-      // Jumping
-      if (player.airborne && player.jumpTime > 0) {
-        const jumpTime = Math.min(dt, player.jumpTime);
-        y -= player.speed * jumpTime;
-        player.jumpTime -= jumpTime;
-
-        const ceiling = this.getCeiling(x, y);
-        if (ceiling) {
-          player.jumpTime = 0;
-          y = ceiling.y * CELL_SIZE + 1 * PLAYER_HEIGHT;
-        }
-      }
-
       // Fall
       if (player.jumpTime === 0) {
         if (player.airborne) {
@@ -80,6 +67,24 @@ export class Engine {
         player.airborne = !groundBelow;
         if (groundBelow) {
           y = groundBelow.y * CELL_SIZE - 0.5 * PLAYER_HEIGHT;
+        }
+      }
+
+      // Jumping
+      if (player.airborne && player.jumpTime > 0) {
+        const jumpTime = Math.min(dt, player.jumpTime);
+        y -= player.speed * jumpTime;
+        player.jumpTime -= jumpTime;
+
+        const ceiling = this.getCeiling(x, y);
+        if (ceiling) {
+          console.log(
+            'touch ceiling',
+            y,
+            ceiling.y * CELL_SIZE + 1 * PLAYER_HEIGHT
+          );
+          player.jumpTime = 0;
+          y = ceiling.y * CELL_SIZE + (3 * PLAYER_HEIGHT) / 4;
         }
       }
 
@@ -111,6 +116,8 @@ export class Engine {
         );
         const wall = cells.find((c) => c.type.isWall);
         if (wall) {
+          const c = this.map.getCell(x, y);
+          console.log('left wall', c.x, c.y, x, y, wall.toString());
           x = (wall.x + 1) * CELL_SIZE + 0.5 * PLAYER_WIDTH;
         }
       }
@@ -129,6 +136,9 @@ export class Engine {
 
       player.x = Math.round(x);
       player.y = Math.round(y);
+
+      const c = this.map.getCell(player.x, player.y);
+      // console.log(`POS ${c.x} ${c.y}`);
     });
 
     this.state.tick();

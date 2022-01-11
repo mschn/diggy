@@ -1,9 +1,4 @@
-import {
-  Cell,
-  CELL_SIZE,
-  PLAYER_BASE_ATTACK_SPEED,
-  PLAYER_BASE_JUMP
-} from '..';
+import { Cell, CELL_SIZE, PLAYER_BASE_ATTACK_SPEED, PLAYER_BASE_JUMP } from '..';
 import { PLAYER_BASE_SPEED } from './constants';
 
 export enum PlayerOrientation {
@@ -48,7 +43,7 @@ export class Player {
       return;
     }
     this.airborne = true;
-    this.jumpTime = PLAYER_BASE_JUMP;
+    this.jumpTime =   PLAYER_BASE_JUMP;
   }
 
   attack(): void {
